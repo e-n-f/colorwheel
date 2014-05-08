@@ -3,9 +3,6 @@
 #include <string.h>
 #include <png.h>
 #include <math.h>
-#include "util.h"
-#include "graphics.h"
-#include "clip.h"
 
 #define WIDTH 1000
 #define HEIGHT 1000
