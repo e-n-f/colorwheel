@@ -13,7 +13,12 @@ void fail() {
 
 }
 
-int main() {
+int main(int argc, char **argv) {
+	double bright = .5;
+	if (argc > 1) {
+		bright = atof(argv[1]);
+	}
+
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
 
@@ -24,7 +29,7 @@ int main() {
 			double d = sqrt(xd * xd + yd * yd);
 
 			if (d <= MID) {
-				double l = .5;
+				double l = bright;
 				double c = d / MID;
 				double h = atan2(1 - yd, xd);
 				// L:   0 .. 1
