@@ -4,7 +4,7 @@
 #include <png.h>
 #include <math.h>
 
-#define WIDTH 1000
+#define WIDTH 2000
 #define HEIGHT 1000
 
 #define MID (WIDTH / 2)
@@ -32,12 +32,12 @@ int main(int argc, char **argv) {
 				double l = (double) Y / HEIGHT;
 
 				// saturated in middle, colorless at ends
-				// double c = 1 - exp(log(fabs((double) Y / WIDTH - .5) * 2) * 2);
+				// double c = 1 - exp(log(fabs((double) Y / HEIGHT - .5) * 2) * 2);
 
 				// fully saturated at black, no saturation at white
 				double c = 1 - exp(log((double) Y / HEIGHT) * 3);
 
-				double h = (double) X / WIDTH * 2 * M_PI;
+				double h = (double) X / WIDTH * 4 * M_PI;
 				// L:   0 .. 1
 				// C:   0 .. 1
 				// H: -pi .. pi
@@ -152,17 +152,17 @@ int main(int argc, char **argv) {
 				g = (g > 1) ? 1 : g;
 				b = (b > 1) ? 1 : b;
 
-				buf[(Y * HEIGHT + X) * 4 + 0] = r * 255;
-				buf[(Y * HEIGHT + X) * 4 + 1] = g * 255;
-				buf[(Y * HEIGHT + X) * 4 + 2] = b * 255;
-				buf[(Y * HEIGHT + X) * 4 + 3] = 255;
+				buf[(Y * WIDTH + X) * 4 + 0] = r * 255;
+				buf[(Y * WIDTH + X) * 4 + 1] = g * 255;
+				buf[(Y * WIDTH + X) * 4 + 2] = b * 255;
+				buf[(Y * WIDTH + X) * 4 + 3] = 255;
 			}
 		}
 	}
 
 	unsigned char *rows[HEIGHT];
 	int i;
-	for (i = 0 ; i < HEIGHT; i++) {
+	for (i = 0; i < HEIGHT; i++) {
 		rows[i] = buf + i * (4 * WIDTH);
 	}
 
