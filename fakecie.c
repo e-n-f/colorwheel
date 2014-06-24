@@ -29,13 +29,18 @@ int main() {
 				double val = .5;
 
 				double base = 0.953562 * exp(log(val) * 1.18012) + 0.0452658;
+				if (base > 1 - 0.0215801) {
+					base = 1 - 0.0215801;
+				}
 
 				double avail = base;
 				if (1 - base < avail) {
 					avail = 1 - base;
 				}
 
-				if (sat >= exp(log((avail - 0.0215801) / 0.55422) / 1.25264)) {
+				if (avail <= 0.0215801) {
+					sat = 0;
+				} else if (sat >= exp(log((avail - 0.0215801) / 0.55422) / 1.25264)) {
 					sat = exp(log((avail - 0.0215801) / 0.55422) / 1.25264);
 				}
 
@@ -53,16 +58,6 @@ int main() {
 				double r1 = rs * sin(h * 2 * M_PI + M_PI - 2) + base;
 				double g1 = gs * sin(h * 2 * M_PI + M_PI + 1.5) + base;
 				double b1 = bs * sin(h * 2 * M_PI + M_PI) + base;
-
-				if (r1 > 1) {
-					r1 = 1;
-				}
-				if (g1 > 1) {
-					g1 = 1;
-				}
-				if (b1 > 1) {
-					b1 = 1;
-				}
 
 				int midr = 255 * r1;
 				int midg = 255 * g1;
