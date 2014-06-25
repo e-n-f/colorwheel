@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <png.h>
+#include <limits.h>
 #include <math.h>
 
 #define WIDTH 1000
@@ -18,6 +19,10 @@ int main(int argc, char **argv) {
 	if (argc > 1) {
 		bright = atof(argv[1]);
 	}
+
+	double maxr = INT_MIN, minr = INT_MAX;
+	double maxg = INT_MIN, ming = INT_MAX;
+	double maxb = INT_MIN, minb = INT_MAX;
 
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
@@ -142,6 +147,27 @@ int main(int argc, char **argv) {
 					b = (b * 12.92);
 				}
 
+				if (r > maxr) {
+					maxr = r;
+				}
+				if (r < minr) {
+					minr = r;
+				}
+
+				if (g > maxg) {
+					maxg = g;
+				}
+				if (g < ming) {
+					ming = g;
+				}
+
+				if (b > maxb) {
+					maxb = b;
+				}
+				if (b < minb) {
+					minb = b;
+				}
+
 				if (r > 0 && g > 0 && b > 0) {
 					printf("%.6f %f %f %f\n", h, r, g, b);
 				}
@@ -170,6 +196,9 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+
+	double mid = (ming + maxg) / 2;
+	printf("# %.6f %.6f %.6f %.6f\n", mid, maxr - mid, maxg - mid, maxb - mid);
 
 	exit(0);
 
