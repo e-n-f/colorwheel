@@ -28,6 +28,8 @@ int main() {
 				double sat = d / MID;
 				double val = .5;
 
+				h = h + (M_PI / 2 - (M_PI - 2)) / (2 * M_PI);
+
 				double base = 0.953562 * exp(log(val) * 1.18012) + 0.0452658;
 				if (base > 1 - 0.0215801) {
 					base = 1 - 0.0215801;
