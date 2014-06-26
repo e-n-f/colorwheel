@@ -32,9 +32,9 @@ int main() {
 				// put red at the right
 				h = h + (M_PI / 2 - (M_PI - 2));
 
-				double r1 = sin(h + M_PI - 2.0) * 0.340404 * sat + l;
-				double g1 = sin(h + M_PI + 1.5) * 0.129024 * sat + l;
-				double b1 = sin(h + M_PI      ) * 0.371993 * sat + l;
+				double r1 = sin(h + M_PI - 2.0) * 0.417211 * sat + l;
+				double g1 = sin(h + M_PI + 1.5) * 0.158136 * sat + l;
+				double b1 = sin(h + M_PI      ) * 0.455928 * sat + l;
 
 				double midr = exp(log(r1 * 0.923166 + 0.0791025) * 1.25) * 255;
 				double midg = exp(log(g1 * 0.923166 + 0.0791025) * 1.25) * 255;
