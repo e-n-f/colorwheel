@@ -24,20 +24,21 @@ int main() {
 			double d = sqrt(xd * xd + yd * yd);
 
 			if (d <= MID) {
-				double h = atan2(1 - yd, xd);
+				double h = atan2(1 - yd, xd) / (2 * M_PI);
 				double sat = d / MID;
 				double l = .5;
 
+				h *= 2 * M_PI;
 				// put red at the right
 				h = h + (M_PI / 2 - (M_PI - 2));
 
-				double r1 = sin(h + M_PI - 2.0) * 0.4050773 * sat + l;
-				double g1 = sin(h + M_PI + 1.5) * 0.2451443 * sat + l;
-				double b1 = sin(h + M_PI      ) * 0.4426702 * sat + l;
+				double r1 = sin(h + M_PI - 2.0) * 0.340404 * sat + l;
+				double g1 = sin(h + M_PI + 1.5) * 0.129024 * sat + l;
+				double b1 = sin(h + M_PI      ) * 0.371993 * sat + l;
 
-				double midr = exp(log(r1 * 0.95427 + 0.0573298) * 1.25) * 255;
-				double midg = exp(log(g1 * 0.95427 + 0.0573298) * 1.25) * 255;
-				double midb = exp(log(b1 * 0.95427 + 0.0573298) * 1.25) * 255;
+				double midr = exp(log(r1 * 0.923166 + 0.0791025) * 1.25) * 255;
+				double midg = exp(log(g1 * 0.923166 + 0.0791025) * 1.25) * 255;
+				double midb = exp(log(b1 * 0.923166 + 0.0791025) * 1.25) * 255;
 
 				buf[(y * HEIGHT + x) * 4 + 0] = midr;
 				buf[(y * HEIGHT + x) * 4 + 1] = midg;
