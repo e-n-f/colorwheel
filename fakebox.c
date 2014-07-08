@@ -24,25 +24,24 @@ int main() {
 			double d = sqrt(xd * xd + yd * yd);
 
 			if (1 || d <= MID) {
-				double h = (double) x / (WIDTH / 2);
-                                double sat = 1;
+				double h = (double) x / (WIDTH / 2) * 2 * M_PI;
+				double c = 1;
 				double l = (double) y / HEIGHT;
 
-				if (sat > 1 - 2 * fabs(l - .5)) {
-					sat = 1 - 2 * fabs(l - .5);
+				// put red at the right
+				h = h + (M_PI / 2 - (M_PI - 2));
+
+				if (c > 1 - 2 * fabs(l - .5)) {
+					c = 1 - 2 * fabs(l - .5);
 				}
 
-                                h *= 2 * M_PI;
-                                // put red at the right
-                                h = h + (M_PI / 2 - (M_PI - 2));
+				double r1 = sin(h + M_PI - 2.0) * 0.417211 * c + l;
+				double g1 = sin(h + M_PI + 1.5) * 0.158136 * c + l;
+				double b1 = sin(h + M_PI      ) * 0.455928 * c + l;
 
-                                double r1 = sin(h + M_PI - 2.0) * 0.417211 * sat + l;
-                                double g1 = sin(h + M_PI + 1.5) * 0.158136 * sat + l;
-                                double b1 = sin(h + M_PI      ) * 0.455928 * sat + l;
-
-                                double midr = exp(log(r1 * 0.923166 + 0.0791025) * 1.25) * 255;
-                                double midg = exp(log(g1 * 0.923166 + 0.0791025) * 1.25) * 255;
-                                double midb = exp(log(b1 * 0.923166 + 0.0791025) * 1.25) * 255;
+				int midr = exp(log(r1 * 0.923166 + 0.0791025) * 1.25) * 255;
+				int midg = exp(log(g1 * 0.923166 + 0.0791025) * 1.25) * 255;
+				int midb = exp(log(b1 * 0.923166 + 0.0791025) * 1.25) * 255;
 
 #if 0
 				if (fabs(xd) < (MID - fabs(yd)) / 4) {
