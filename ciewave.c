@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
 					z = (z - (16.0 / 116.0)) / 7.787;
 				}
 
+
 #if 1 // D65
                                 x *= 95.0429;
                                 y *= 100.0;
@@ -147,6 +148,16 @@ int main(int argc, char **argv) {
 					b = (b * 12.92);
 				}
 
+				if (r > 0) {
+					r = exp(log(r) / 1.25);
+				}
+				if (g > 0) {
+					g = exp(log(g) / 1.25);
+				}
+				if (b > 0) {
+					b = exp(log(b) / 1.25);
+				}
+
 				if (r > maxr) {
 					maxr = r;
 				}
@@ -167,6 +178,9 @@ int main(int argc, char **argv) {
 				if (b < minb) {
 					minb = b;
 				}
+
+				printf("%.6f %f %f %f\n", h, r, g, b);
+				continue;
 
 				if (r > 0 && g > 0 && b > 0) {
 					printf("%.6f %f %f %f\n", h, r, g, b);
