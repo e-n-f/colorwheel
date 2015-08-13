@@ -33,6 +33,11 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%f %f %f   %f %f %f\n", ll, cc, hh, ll2, cc2, hh2);
 	}
 
+	if (argc == 3) {
+		ll = atof(argv[1]);
+		cc = atof(argv[2]);
+	}
+
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
 
@@ -42,7 +47,7 @@ int main(int argc, char **argv) {
 			double yd = Y - MID;
 			double d = sqrt(xd * xd + yd * yd);
 
-			if (1 || d <= MID) {
+			if (d <= MID || hh >= 0) {
 				double l = bright;
 				double c = d / MID;
 				double h = atan2(1 - yd, xd);
@@ -50,7 +55,7 @@ int main(int argc, char **argv) {
 				// c = .75;
 				// l = 1;
 
-				if (ll >= 0) {
+				if (hh >= 0) {
 					l = ll;
 					c = cc;
 					h = hh;
@@ -63,6 +68,9 @@ int main(int argc, char **argv) {
 						// c = 0;
 						// h = 2 * M_PI - h;
 					}
+				} else if (ll >= 0) {
+					l = ll;
+					c = cc;
 				}
 
 				// L:   0 .. 1
@@ -81,7 +89,7 @@ int main(int argc, char **argv) {
 				// LAB to XYZ
 				// http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
 
-				if (ll < 0) {
+				if (hh < 0 && ll < 0) {
 					l *= 100;
 
 					// Scale so everything but cyan exists at l = .5
