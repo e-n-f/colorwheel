@@ -8,8 +8,7 @@
 #include <png.h>
 
 void usage(char **argv) {
-	fprintf(stderr, "Usage: %s [-o outfile] minlat minlon maxlat maxlon zoom http://whatever/{z}/{x}/{y}.png ...\n", argv[0]);
-	fprintf(stderr, "Usage: %s [-o outfile] -c lat lon width height zoom http://whatever/{z}/{x}/{y}.png ...\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-o outfile] http://whatever/whatever.{png,jpeg}\n", argv[0]);
 }
 
 // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -399,10 +398,6 @@ void convert(unsigned char *buf, int width, int height) {
 			buf[(y * width + x) * 4 + 0] = r;
 			buf[(y * width + x) * 4 + 1] = g;
 			buf[(y * width + x) * 4 + 2] = b;
-
-			if (buf[(y * width + x) * 4 + 0] == 0 && buf[(y * width + x) * 4 + 1] == 0 && buf[(y * width + x) * 4 + 2] == 0) {
-				fprintf(stderr, "what happened? %d %d %d from %d %d %d\n", buf[(y * width + x) * 4 + 0], buf[(y * width + x) * 4 + 1], buf[(y * width + x) * 4 + 1], r, g, b);
-			}
 		}
 	}
 }
