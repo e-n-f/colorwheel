@@ -67,6 +67,22 @@ void fail() {
 
 }
 
+
+double g(x) {
+	double a               = 1.20847  ;
+	double u               = -1.67808 ;
+	double o               = 1.04243  ;
+	double a1              = 1.73992  ;
+	double u1              = 1.29054  ;
+	double o1              = 0.954128 ;
+
+	return a / (o * sqrt(2 * M_PI)) * exp(-(pow(x - u, 2)) / (2 * o * o)) + a1 / (o1 * sqrt(2 * M_PI)) * exp(-(pow(x - u1, 2)) / (2 * o1 * o1));
+}
+
+double h(x) {
+	return g(x) + g(x - 2 * M_PI) + g (x + 2 * M_PI);
+}
+
 int main(int argc, char **argv) {
 	double bright = .5;
 	if (argc > 1) {
@@ -89,6 +105,17 @@ int main(int argc, char **argv) {
 
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
+
+	int nstripes = 0;
+	double here = -M_PI;
+	while (here < M_PI) {
+		double there = here + h(here);
+		stripes[nstripes++] = here - h(here) / 2; // (here + there) / 2;
+
+		//printf("%f %f %f\n", here, there, h(here));
+		here = there;
+	}
+
 
 	for (X = 0; X < WIDTH; X++) {
 		for (Y = 0; Y < HEIGHT; Y++) {
@@ -123,8 +150,12 @@ int main(int argc, char **argv) {
 				l = 50;
 				c = 29;
 
-				h += M_PI;
-				h = stripes[(int) (h / (2 * M_PI) * nstripes)];
+				int n = (int) floor((h + M_PI) / (2 * M_PI) * (nstripes - 1));
+				if (n < 0 || n >= nstripes) {
+					fprintf(stderr, "%f %d\n", h, n);
+				}
+
+				h = stripes[n];
 
 				// L:   0 .. 1
 				// C:   0 .. 1
@@ -188,8 +219,8 @@ int main(int argc, char **argv) {
 				z /= 100.0;
 
 				double Mi[3][3] = {{ 3.2406, -1.5372, -0.4986},
-				                   {-0.9689,  1.8758,  0.0415},
-				                   { 0.0557, -0.2040,  1.0570}};
+						   {-0.9689,  1.8758,  0.0415},
+						   { 0.0557, -0.2040,  1.0570}};
 				double r, g;
 
 				// [r g b] = [X Y Z][Mi]
