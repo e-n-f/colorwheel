@@ -1,0 +1,355 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <curl/curl.h>
+#include <jpeglib.h>
+#include <png.h>
+
+void usage(char **argv) {
+	fprintf(stderr, "Usage: %s [-o outfile] minlat minlon maxlat maxlon zoom http://whatever/{z}/{x}/{y}.png ...\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-o outfile] -c lat lon width height zoom http://whatever/{z}/{x}/{y}.png ...\n", argv[0]);
+}
+
+// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+void latlon2tile(double lat, double lon, int zoom, unsigned int *x, unsigned int *y) {
+	double lat_rad = lat * M_PI / 180;
+	unsigned long long n = 1LL << zoom;
+
+	*x = n * ((lon + 180) / 360);
+	*y = n * (1 - (log(tan(lat_rad) + 1/cos(lat_rad)) / M_PI)) / 2;
+}
+
+// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+void tile2latlon(unsigned int x, unsigned int y, int zoom, double *lat, double *lon) {
+	unsigned long long n = 1LL << zoom;
+	*lon = 360.0 * x / n - 180.0;
+	double lat_rad = atan(sinh(M_PI * (1 - 2.0 * y / n)));
+	*lat = lat_rad * 180 / M_PI;
+}
+
+struct data {
+	char *buf;
+	int len;
+	int nalloc;
+};
+
+struct image {
+	unsigned char *buf;
+	int depth;
+	int width;
+	int height;
+};
+
+size_t curl_receive(char *ptr, size_t size, size_t nmemb, void *v) {
+	struct data *data = v;
+
+	if (data->len + size * nmemb >= data->nalloc) {
+		data->nalloc += size * nmemb + 50000;
+		data->buf = realloc(data->buf, data->nalloc);
+	}
+
+	memcpy(data->buf + data->len, ptr, size * nmemb);
+	data->len += size * nmemb;
+
+	return size * nmemb;
+};
+
+struct image *read_jpeg(char *s, int len) {
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+	jpeg_mem_src(&cinfo, (unsigned char *) s, len);
+	jpeg_read_header(&cinfo, TRUE);
+	jpeg_start_decompress(&cinfo);
+
+	int row_stride = cinfo.output_width * cinfo.output_components;
+	JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray) ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+
+	struct image *i = malloc(sizeof(struct image));
+	i->buf = malloc(cinfo.output_width * cinfo.output_height * cinfo.output_components);
+	i->width = cinfo.output_width;
+	i->height = cinfo.output_height;
+	i->depth = cinfo.output_components;
+
+	unsigned char *here = i->buf;
+	while (cinfo.output_scanline < cinfo.output_height) {
+		jpeg_read_scanlines(&cinfo, buffer, 1);
+		memcpy(here, buffer[0], row_stride);
+		here += row_stride;
+	}
+
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+
+	return i;
+}
+
+static void fail(png_structp png_ptr, png_const_charp error_msg) {
+	fprintf(stderr, "PNG error %s\n", error_msg);
+	exit(EXIT_FAILURE);
+}
+
+struct read_state {
+	char *base;
+	int off;
+	int len;
+};
+
+void user_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
+	struct read_state *state = png_get_io_ptr(png_ptr);
+
+	if (state->off + length > state->len) {
+		length = state->len - state->off;
+	}
+
+	memcpy(data, state->base + state->off, length);
+	state->off += length;
+}
+
+struct image *read_png(char *s, int len) {
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+	struct read_state state;
+	state.base = s;
+	state.off = 0;
+	state.len = len;
+
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, fail, fail, fail);
+	if (png_ptr == NULL) {
+		fprintf(stderr, "PNG init failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	info_ptr = png_create_info_struct(png_ptr);
+	if (info_ptr == NULL) {
+		fprintf(stderr, "PNG init failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	png_set_read_fn(png_ptr, &state, user_read_data);
+	png_set_sig_bytes(png_ptr, 0);
+
+	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
+
+	png_uint_32 width, height;
+	int bit_depth;
+	int color_type, interlace_type;
+
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
+
+	struct image *i = malloc(sizeof(struct image));
+	i->width = width;
+	i->height = height; 
+	i->depth = png_get_channels(png_ptr, info_ptr);
+	i->buf = malloc(i->width * i->height * i->depth);
+
+	unsigned int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
+	png_bytepp row_pointers = png_get_rows(png_ptr, info_ptr);
+
+	int n;
+	for (n = 0; n < i->height; n++) {
+		memcpy(i->buf + row_bytes * n, row_pointers[n], row_bytes);
+	}
+
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	return i;
+}
+
+double g(x) {
+	double a               = 1.20847  ;
+	double u               = -1.67808 ;
+	double o               = 1.04243  ;
+	double a1              = 1.73992  ;
+	double u1              = 1.29054  ;
+	double o1              = 0.954128 ;
+
+	return a / (o * sqrt(2 * M_PI)) * exp(-(pow(x - u, 2)) / (2 * o * o)) + a1 / (o1 * sqrt(2 * M_PI)) * exp(-(pow(x - u1, 2)) / (2 * o1 * o1));
+}
+
+double h(x) {
+	return g(x) + g(x - 2 * M_PI) + g (x + 2 * M_PI);
+}
+
+double f(x) {
+	double n               = 4.18685;
+	double m               = -0.678404;
+
+	return n * exp(log(x) * m);
+}
+
+void convert(unsigned char *buf, int width, int height) {
+
+}
+
+int main(int argc, char **argv) {
+	extern int optind;
+	extern char *optarg;
+	int i;
+
+	char *outfile = NULL;
+
+	while ((i = getopt(argc, argv, "o:")) != -1) {
+		switch (i) {
+		case 'o':
+			outfile = optarg;
+			break;
+
+		default:
+			usage(argv);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if (argc - optind != 1) {
+		usage(argv);
+		exit(EXIT_FAILURE);
+	}
+
+	if (outfile == NULL && isatty(1)) {
+		fprintf(stderr, "Didn't specify -o and standard output is a terminal\n");
+		exit(EXIT_FAILURE);
+	}
+	FILE *outfp = stdout;
+	if (outfile != NULL) {
+		outfp = fopen(outfile, "wb");
+		if (outfp == NULL) {
+			perror(outfile);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	int width, height;
+	unsigned char *buf;
+
+	{
+		{
+			{
+				char *url = argv[optind];
+
+				CURL *curl = curl_easy_init();
+				if (curl == NULL) {
+					fprintf(stderr, "Curl won't start\n");
+					exit(EXIT_FAILURE);
+				}
+
+				struct data data;
+				data.buf = NULL;
+				data.len = 0;
+				data.nalloc = 0;
+
+				curl_easy_setopt(curl, CURLOPT_URL, url);
+				curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_receive);
+
+				CURLcode res = curl_easy_perform(curl);
+				if (res != CURLE_OK) {
+					fprintf(stderr, "Can't retrieve %s: %s\n", url,
+						curl_easy_strerror(res));
+					exit(EXIT_FAILURE);
+				}
+
+				struct image *i;
+
+				if (data.len >= 4 && memcmp(data.buf, "\x89PNG", 4) == 0) {
+					i = read_png(data.buf, data.len);
+				} else if (data.len >= 2 && memcmp(data.buf, "\xFF\xD8", 2) == 0) {
+					i = read_jpeg(data.buf, data.len);
+				} else {
+					fprintf(stderr, "Don't recognize file format\n");
+
+					free(data.buf);
+					curl_easy_cleanup(curl);
+					exit(EXIT_FAILURE);
+				}
+
+				free(data.buf);
+				curl_easy_cleanup(curl);
+
+				width = i->width;
+				height = i->height;
+				buf = malloc(i->width * i->height * 4);
+
+				int x, y;
+				for (y = 0; y < i->height; y++) {
+					for (x = 0; x < i->width; x++) {
+						if (i->depth == 4) {
+							double as = buf[((y) * width + x) * 4 + 3] / 255.0;
+							double rs = buf[((y) * width + x) * 4 + 0] / 255.0 * as;
+							double gs = buf[((y) * width + x) * 4 + 1] / 255.0 * as;
+							double bs = buf[((y) * width + x) * 4 + 2] / 255.0 * as;
+
+							double ad = i->buf[(y * i->width + x) * 4 + 3] / 255.0;
+							double rd = i->buf[(y * i->width + x) * 4 + 0] / 255.0 * ad;
+							double gd = i->buf[(y * i->width + x) * 4 + 1] / 255.0 * ad;
+							double bd = i->buf[(y * i->width + x) * 4 + 2] / 255.0 * ad;
+
+							// https://code.google.com/p/pulpcore/wiki/TutorialBlendModes
+							double ar = as * (1 - ad) + ad;
+							double rr = rs * (1 - ad) + rd;
+							double gr = gs * (1 - ad) + gd;
+							double br = bs * (1 - ad) + bd;
+
+							buf[((y) * width + x) * 4 + 3] = ar * 255.0;
+							buf[((y) * width + x) * 4 + 0] = rr / ar * 255.0;
+							buf[((y) * width + x) * 4 + 1] = gr / ar * 255.0;
+							buf[((y) * width + x) * 4 + 2] = br / ar * 255.0;
+						} else if (i->depth == 3) {
+							buf[((y) * width + x) * 4 + 0] = i->buf[(y * i->width + x) * 3 + 0];
+							buf[((y) * width + x) * 4 + 1] = i->buf[(y * i->width + x) * 3 + 1];
+							buf[((y) * width + x) * 4 + 2] = i->buf[(y * i->width + x) * 3 + 2];
+							buf[((y) * width + x) * 4 + 3] = 255;
+						} else {
+							buf[((y) * width) * 4 + 0] = i->buf[(y * i->width + x) * i->depth + 0];
+							buf[((y) * width) * 4 + 1] = i->buf[(y * i->width + x) * i->depth + 0];
+							buf[((y) * width) * 4 + 2] = i->buf[(y * i->width + x) * i->depth + 0];
+							buf[((y) * width) * 4 + 3] = 255;
+						}
+					}
+				}
+
+				free(i->buf);
+				free(i);
+			}
+		}
+	}
+
+	unsigned char *rows[height];
+	for (i = 0; i < height; i++) {
+		rows[i] = buf + i * (4 * width);
+	}
+
+	convert(buf, width, height);
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, fail, fail, fail);
+	if (png_ptr == NULL) {
+		fprintf(stderr, "PNG failure (write struct)\n");
+		exit(EXIT_FAILURE);
+	}
+	info_ptr = png_create_info_struct(png_ptr);
+	if (info_ptr == NULL) {
+		png_destroy_write_struct(&png_ptr, NULL);
+		fprintf(stderr, "PNG failure (info struct)\n");
+		exit(EXIT_FAILURE);
+	}
+
+	png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+	png_set_rows(png_ptr, info_ptr, rows);
+	png_init_io(png_ptr, outfp);
+	png_write_png(png_ptr, info_ptr, 0, NULL);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+	if (outfile != NULL) {
+		fclose(outfp);
+	}
+
+	return 0;
+}
