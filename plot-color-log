@@ -11,7 +11,11 @@ h(x) = g(x) + g(x - 2 * pi) + g (x + 2 * pi)
 
 fit h(x) "color-log" using 1:($4 * f(30) / f($2)) via a, u, o, a1, u1, o1
 
+set xrange [-pi:pi]
+set yrange [0:]
 plot "color-log" using 1:($4 * f(30) / f($2)), h(x)
+unset xrange
+unset yrange
 
 
 # n               = 4.18685          +/- 0.3639       (8.69%)
