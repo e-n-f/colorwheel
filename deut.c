@@ -9,60 +9,6 @@
 
 #define MID (WIDTH / 2)
 
-double stripes[] = {
-	0.00,
-	0.12,
-	0.23,
-	0.36,
-	0.52,
-	0.66,
-	0.81,
-	1.02,
-	1.48,
-	1.95,
-	2.10,
-	2.24,
-	2.34,
-	2.46,
-	2.56,
-	2.64,
-	2.73,
-	2.79,
-	2.93,
-	3.07,
-	3.20,
-	3.36,
-	3.44,
-	3.52,
-	3.62,
-	3.78,
-	3.96,
-	4.13,
-	4.30,
-	4.53,
-	4.58,
-	4.79,
-	4.91,
-	4.99,
-	5.06,
-	5.14,
-	5.27,
-	5.34,
-	5.43,
-	5.48,
-	5.56,
-	5.68,
-	5.74,
-	5.84,
-	5.92,
-	5.99,
-	6.09,
-	6.15,
-	6.20,
-};
-
-int nstripes = sizeof(stripes) / sizeof(stripes[0]);
-
 void fail() {
 
 }
@@ -84,31 +30,14 @@ double h(x) {
 }
 
 int main(int argc, char **argv) {
-	double bright = .5;
-	if (argc > 1) {
-		bright = atof(argv[1]);
-	}
-
-	double ll = -1, cc = -1, hh = -1;
-	double ll2 = -1, cc2 = -1, hh2 = -1;
-	if (argc == 7) {
-		ll = atof(argv[1]);
-		cc = atof(argv[2]);
-		hh = atof(argv[3]);
-
-		ll2 = atof(argv[4]);
-		cc2 = atof(argv[5]);
-		hh2 = atof(argv[6]);
-
-		fprintf(stderr, "%f %f %f   %f %f %f\n", ll, cc, hh, ll2, cc2, hh2);
-	}
-
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
 
+	double stripes[1000];
 	int nstripes = 0;
+
 	double here = -M_PI;
-	while (here < M_PI) {
+	while (here < M_PI && nstripes < 1000) {
 		double there = here + h(here);
 		stripes[nstripes++] = here - h(here) / 2; // (here + there) / 2;
 
@@ -124,28 +53,9 @@ int main(int argc, char **argv) {
 			double d = sqrt(xd * xd + yd * yd);
 
 			if (d <= MID) {
-				double l = bright;
-				double c = d / MID;
+				double l = 50;
+				double c = 29;
 				double h = atan2(1 - yd, xd);
-
-				// c = .75;
-				// l = 1;
-
-				if (ll >= 0) {
-					l = ll;
-					c = cc;
-					h = hh;
-
-					if (Y > MID) {
-						l = ll2;
-						c = cc2;
-						h = hh2;
-
-						// c = 0;
-						// h = 2 * M_PI - h;
-					}
-				}
-
 
 				l = 50;
 				c = 29;
@@ -172,14 +82,6 @@ int main(int argc, char **argv) {
 
 				// LAB to XYZ
 				// http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
-
-				if (0 && ll < 0) {
-					l *= 100;
-
-					// Scale so everything but cyan exists at l = .5
-					a *= 55;
-					b *= 55;
-				}
 
 				double y = (l + 16.0) / 116.0;
 				double y3 = pow(y, 3.0);
@@ -244,23 +146,6 @@ int main(int argc, char **argv) {
 				} else {
 					b = (b * 12.92);
 				}
-
-#if 1
-				if (r < 0 || g < 0 || b < 0) {
-					r = g = b = 0;
-				}
-				if (r > 1 || g > 1 || b > 1) {
-					r = g = b = 1;
-				}
-#endif
-
-				r = (r < 0) ? 0 : r;
-				g = (g < 0) ? 0 : g;
-				b = (b < 0) ? 0 : b;
-
-				r = (r > 1) ? 1 : r;
-				g = (g > 1) ? 1 : g;
-				b = (b > 1) ? 1 : b;
 
 				buf[(Y * HEIGHT + X) * 4 + 0] = r * 255;
 				buf[(Y * HEIGHT + X) * 4 + 1] = g * 255;

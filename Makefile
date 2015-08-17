@@ -13,5 +13,8 @@ JPEG_LIBS = -L/usr/local/Cellar/jpeg/8d/lib/
 simulate: simulate.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o simulate simulate.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
+deut: deut.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o deut deut.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
 clean:
 	rm -f stitch
