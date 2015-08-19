@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cat ../chroma-log | grep Topis | sed 's/Topislighter/1/' | sed 's/Topisdarker/-1/' | sed 's/Topisneutrallydifferent/0/' > chroma-log2
