@@ -151,6 +151,26 @@ function XYZtoRGB(X, Y, Z) {
 	return [r * 255, g * 255, b * 255];
 }
 
+// https://en.wikipedia.org/wiki/CIE_1931_color_space
+function XYZtoxyY(X, Y, Z) {
+	X /= 100;
+	Y /= 100;
+	Z /= 100;
+
+	var x = X / (X + Y + Z);
+	var y = Y / (X + Y + Z);
+
+	return [ x, y, Y ];
+}
+
+// https://en.wikipedia.org/wiki/CIE_1931_color_space
+function xyYtoXYZ(x, y, Y) {
+	var X = Y / y * x;
+	var Z = Y / y * (1 - x - y);
+
+	return [ X * 100, Y * 100, Z * 100 ];
+}
+
 
 var r = Math.floor(Math.random() * 256);
 var g = Math.floor(Math.random() * 256);
@@ -158,6 +178,10 @@ var b = Math.floor(Math.random() * 256);
 
 console.log([r, g, b]);
 var xyz = RGBtoXYZ(r, g, b);
+console.log(xyz);
+var xyY = XYZtoxyY(xyz[0], xyz[1], xyz[2]);
+console.log(xyY);
+xyz = xyYtoXYZ(xyY[0], xyY[1], xyY[2]);
 console.log(xyz);
 var lab = XYZtoLAB(xyz[0], xyz[1], xyz[2]);
 console.log(lab);
