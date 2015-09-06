@@ -13,38 +13,14 @@ void fail() {
 
 }
 
-
-double g(x) {
-	double a               = 1.20847  ;
-	double u               = -1.67808 ;
-	double o               = 1.04243  ;
-	double a1              = 1.73992  ;
-	double u1              = 1.29054  ;
-	double o1              = 0.954128 ;
-
-	return a / (o * sqrt(2 * M_PI)) * exp(-(pow(x - u, 2)) / (2 * o * o)) + a1 / (o1 * sqrt(2 * M_PI)) * exp(-(pow(x - u1, 2)) / (2 * o1 * o1));
-}
-
-double h(x) {
-	return g(x) + g(x - 2 * M_PI) + g (x + 2 * M_PI);
-}
-
 int main(int argc, char **argv) {
-	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
-	int X, Y;
-
-	double stripes[1000];
-	int nstripes = 0;
-
-	double here = -M_PI;
-	while (here < M_PI && nstripes < 1000) {
-		double there = here + h(here);
-		stripes[nstripes++] = here - h(here) / 2; // (here + there) / 2;
-
-		//printf("%f %f %f\n", here, there, h(here));
-		here = there;
+	double lightness = -50;
+	if (argc > 1) {
+		lightness = atof(argv[1]);
 	}
 
+	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
+	int X, Y;
 
 	for (X = 0; X < WIDTH; X++) {
 		for (Y = 0; Y < HEIGHT; Y++) {
@@ -52,19 +28,13 @@ int main(int argc, char **argv) {
 			double yd = Y - MID;
 			double d = sqrt(xd * xd + yd * yd);
 
-			if (d <= MID) {
-				double l = 75;
-				double c = 38;
-				double h = atan2(1 - yd, xd);
+			if (1 || d <= MID) {
+				double l = (double) X /  WIDTH;
+				double c = (double) Y / WIDTH;
+				double h = -2;
+				h = (double) X / WIDTH * 2 * M_PI - M_PI;
 
-
-				int n = (int) floor((h + M_PI) / (2 * M_PI) * (nstripes - 1));
-				if (n < 0 || n >= nstripes) {
-					fprintf(stderr, "%f %d\n", h, n);
-				}
-
-				h = stripes[n];
-
+				if (lightness > -50) { l = lightness / 100.0; }
 				// L:   0 .. 1
 				// C:   0 .. 1
 				// H: -pi .. pi
@@ -80,6 +50,18 @@ int main(int argc, char **argv) {
 
 				// LAB to XYZ
 				// http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
+
+				l *= 100;
+				a *= 100;
+				b *= 100;
+#if 0
+				// Scale so the circle all really exists at l = .5
+				a *= 29;
+				b *= 29;
+				// Scale so everything but cyan exists at l = .5
+				a *= 55;
+				b *= 55;
+#endif
 
 				double y = (l + 16.0) / 116.0;
 				double y3 = pow(y, 3.0);
@@ -119,8 +101,8 @@ int main(int argc, char **argv) {
 				z /= 100.0;
 
 				double Mi[3][3] = {{ 3.2406, -1.5372, -0.4986},
-						   {-0.9689,  1.8758,  0.0415},
-						   { 0.0557, -0.2040,  1.0570}};
+				                   {-0.9689,  1.8758,  0.0415},
+				                   { 0.0557, -0.2040,  1.0570}};
 				double r, g;
 
 				// [r g b] = [X Y Z][Mi]
@@ -145,9 +127,26 @@ int main(int argc, char **argv) {
 					b = (b * 12.92);
 				}
 
+#if 0
+				if (r < 0 || g < 0 || b < 0) {
+					r = g = b = 0;
+				}
+				if (r > 1 || g > 1 || b > 1) {
+					r = g = b = 1;
+				}
+#endif
+
 				if (r < 0 || g < 0 || b < 0 || r > 1 || g > 1 || b > 1) {
 					r = g = b = 0;
 				}
+
+				r = (r < 0) ? 0 : r;
+				g = (g < 0) ? 0 : g;
+				b = (b < 0) ? 0 : b;
+
+				r = (r > 1) ? 1 : r;
+				g = (g > 1) ? 1 : g;
+				b = (b > 1) ? 1 : b;
 
 				buf[(Y * HEIGHT + X) * 4 + 0] = r * 255;
 				buf[(Y * HEIGHT + X) * 4 + 1] = g * 255;
