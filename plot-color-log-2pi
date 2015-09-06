@@ -1,0 +1,83 @@
+# cat color-log | awk '{if ($1 < 0) { $1 += 2 * 3.1415926 } print $1, $2, $3, $4 }' > color-log-2pi
+
+
+
+set terminal postscript
+
+# n               = 4.18685          +/- 0.3639       (8.69%)
+# m               = -0.678404        +/- 0.02253      (3.321%)
+
+f(x) = n * x ** m
+fit log(f(x)) "color-log-2pi" using 2:(log($4)) via n, m
+set logscale y
+plot "color-log-2pi" using 2:4, f(x)
+unset logscale y
+
+# a               = 1.20847          +/- 0.1323       (10.95%)
+# u               = -1.67808         +/- 0.04763      (2.838%)
+# o               = 1.04243          +/- 0.1224       (11.74%)
+# a1              = 1.73992          +/- 0.1375       (7.904%)
+# u1              = 1.29054          +/- 0.03364      (2.607%)
+# o1              = 0.954128         +/- 0.07291      (7.642%)
+
+a               = 1.20844        
+u               = -1.67809       
+o               = 1.04241        
+a1              = 1.73995        
+u1              = 1.29052        
+o1              = 0.954146       
+
+g(x) = a / (o * sqrt(2 * pi)) * exp(-((x - u) ** 2) / (2 * o ** 2)) + a1 / (o1 * sqrt(2 * pi)) * exp(-((x - u1) ** 2) / (2 * o1 ** 2))
+h(x) = g(x) + g(x - 2 * pi) + g (x + 2 * pi)
+
+fit h(x) "color-log-2pi" using 1:($4 * f(30) / f($2)) via a, u, o, a1, u1, o1
+
+set xrange [0:2 * pi]
+set yrange [0:]
+plot "color-log-2pi" using 1:($4 * f(30) / f($2)), h(x)
+unset xrange
+unset yrange
+
+
+
+
+# j               = -0.000584367     +/- 0.0005769    (98.73%)
+# k               = 1.03402          +/- 0.03512      (3.397%)
+
+i(x) = j * x + k
+fit i(x) "color-log-2pi" using 3:($4 * f(30) / f($2) / h($1)) via j, k
+
+# plot "color-log-2pi" using 3:($4 * f(30) / f($2) / h($1)), i(x)
+
+
+
+
+
+a0              = 3705.76    
+a1              = -19775.4   
+a2              = 57850.2    
+a3              = -100798    
+a4              = 115437     
+a5              = -91358.2   
+a6              = 51335.9    
+a7              = -20747.4   
+a8              = 6039.78    
+a9              = -1253.39   
+a10             = 180.651    
+a11             = -17.1668   
+a12             = 0.966393   
+a13             = -0.0243976 
+
+nm(x) = a13 * x ** 13 + a12 * x ** 12 + a11 * x ** 11 + a10 * x ** 10 + a9 * x ** 9 + a8 * x ** 8 + a7 * x ** 7 + a6 * x ** 6 + a5 * x ** 5 + a4 * x ** 4 + a3 * x ** 3 + a2 * x ** 2 + a1 * x ** 1 + a0 * x ** 0
+
+fit nm(x) "nm-lch" using 4:1 via a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13
+
+plot "nm-lch" using 4:1, nm(x)
+
+set xrange [425:645]
+
+# set yrange [0:200]
+set logscale y
+
+plot "color-log-2pi" using (nm($1)):(nm($1 - ($4 * f(30) / f($2)) / 2) - nm($1 + ($4 * f(30) / f($2)) / 2))
+
