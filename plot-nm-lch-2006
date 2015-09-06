@@ -1,0 +1,17 @@
+set terminal postscript
+
+f(x) = a * (1 - (.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * (1 - (.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * (1 - (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
+
+a               = 1.51366   
+u               = 574.457   
+o               = 29.2535   
+a1              = 1.7271    
+u1              = 473.458   
+o1              = 6.20547   
+b               = 0.680437  
+a2              = 1.68852   
+u2              = 497.363   
+o2              = 39.4372   
+
+fit f(x) "nm-lch-2006" using 1:4 via a, u, o, a1, u1, o1, b, a2, u2, o2
+plot "nm-lch-2006" using 1:4 with lines, f(x)
