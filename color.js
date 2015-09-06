@@ -275,12 +275,16 @@ console.log(rgb);
 
 */
 
-for (var i = 360; i < 650; i += 5) {
+for (var i = 425; i < 650; i += 5) {
 	var xyz = NMtoXYZ[i];
 	lab = XYZtoLAB(xyz[0] * 100, xyz[1] * 100, xyz[2] * 100);
 	lch = LABtoLCH(lab[0], lab[1], lab[2]);
-	lab = LCHtoLAB(50, 29, lch[2]);
+	lab = LCHtoLAB(74, 40, lch[2]);
 	xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
 	rgb = XYZtoRGB(xyz[0], xyz[1], xyz[2]);
-	console.log(i + " " + lch + " " + RGBtohex(rgb[0], rgb[1], rgb[2]));
+
+  if (lch[2] < 0) {
+    lch[2] += 2 * Math.PI;
+  }
+	console.log(i + " " + lch[0] + " " + lch[1] + " " + lch[2] + " " + RGBtohex(rgb[0], rgb[1], rgb[2]));
 }
