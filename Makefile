@@ -22,6 +22,8 @@ onehue: onehue.c
 onelightness: onelightness.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onelightness onelightness.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
+ramp: ramp.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o ramp ramp.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
 deut: deut.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o deut deut.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
