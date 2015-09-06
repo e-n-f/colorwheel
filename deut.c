@@ -53,8 +53,8 @@ int main(int argc, char **argv) {
 			double d = sqrt(xd * xd + yd * yd);
 
 			if (d <= MID) {
-				double l = 75;
-				double c = 38;
+				double l = 74;
+				double c = 40;
 				double h = atan2(1 - yd, xd);
 
 
