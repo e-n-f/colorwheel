@@ -15,3 +15,11 @@ o2              = 39.4372
 
 fit f(x) "nm-lch-2006" using 1:4 via a, u, o, a1, u1, o1, b, a2, u2, o2
 plot "nm-lch-2006" using 1:4 with lines, f(x)
+
+set xrange [411:694]
+set logscale y
+
+plot 1 / ( \
+     a  * exp(- (x - u ) ** 2 / (2 * o  ** 2)) / (o  * sqrt(2 * pi)) + \
+     a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + \
+     a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi)) )
