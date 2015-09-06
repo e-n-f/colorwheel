@@ -76,8 +76,36 @@ plot "nm-lch" using 4:1, nm(x)
 
 set xrange [425:645]
 
-# set yrange [0:200]
-set logscale y
+set yrange [0:30]
+# set logscale y
 
-plot "color-log-2pi" using (nm($1)):(nm($1 - ($4 * f(30) / f($2)) / 2) - nm($1 + ($4 * f(30) / f($2)) / 2))
+plot "color-log-2pi" using (nm($1)):((nm($1 - ($4 * f(30) / f($2)) / 2) - nm($1 + ($4 * f(30) / f($2)) / 2)))
 
+
+
+# # red cone
+# 
+# f(x) = a * exp(- (x - u) ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi)) + a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi))
+# 
+# red_a               = 134.537  
+# red_u               = 579.602  
+# red_o               = 56.0143  
+# red_a1              = 20.5603  
+# red_u1              = 448.421  
+# red_o1              = 34.2699  
+# red_a2              = 18.5586  
+# red_u2              = 520.914  
+# red_o2              = 27.3367  
+# 
+# fit f(x) "stockman-sharpe-cone" using 1:(exp($2)) via a, u, o, a1, u1, o1, a2, u2, o2
+# 
+# # blue cone
+# 
+# blue_a               = 38.1588 
+# blue_u               = 434.277 
+# blue_o               = 24.4683 
+# blue_a1              = 50.0002 
+# blue_u1              = 468.568 
+# blue_o1              = 36.3005 
+# 
+# # 
