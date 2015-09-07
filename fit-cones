@@ -1,0 +1,79 @@
+set terminal postscript color
+
+# red cone
+
+red(x) = red_a * exp(- (x - red_u) ** 2 / (2 * red_o ** 2)) / (red_o * sqrt(2 * pi)) + red_a1 * exp(- (x - red_u1) ** 2 / (2 * red_o1 ** 2)) / (red_o1 * sqrt(2 * pi)) + red_a2 * exp(- (x - red_u2) ** 2 / (2 * red_o2 ** 2)) / (red_o2 * sqrt(2 * pi))
+
+red_a               = 134.537
+red_u               = 579.602
+red_o               = 56.0143
+red_a1              = 20.5603
+red_u1              = 448.421
+red_o1              = 34.2699
+red_a2              = 18.5586
+red_u2              = 520.914
+red_o2              = 27.3367
+
+red_a           = 133.421  
+red_u           = 577.919  
+red_o           = 56.3307  
+red_a1          = 16.8785  
+red_u1          = 440.553  
+red_o1          = 28.4663  
+red_a2          = 28.3008  
+red_u2          = 507.765  
+red_o2          = 34.3415  
+
+fit red(x) "cvrl/ss10q_fine.csv" using 1:(exp($2)) via red_a, red_u, red_o, red_a1, red_u1, red_o1, red_a2, red_u2, red_o2
+
+blue(x) = blue_a * exp(- (x - blue_u) ** 2 / (2 * blue_o ** 2)) / (blue_o * sqrt(2 * pi)) + blue_a1 * exp(- (x - blue_u1) ** 2 / (2 * blue_o1 ** 2)) / (blue_o1 * sqrt(2 * pi))
+
+# blue cone
+
+blue_a               = 38.1588
+blue_u               = 434.277
+blue_o               = 24.4683
+blue_a1              = 50.0002
+blue_u1              = 468.568
+blue_o1              = 36.3005
+
+blue_a          = 42.4711 
+blue_u          = 437.516 
+blue_o          = 24.9774 
+blue_a1         = 41.32   
+blue_u1         = 469.348 
+blue_o1         = 34.8191 
+
+fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1
+
+set xrange [425:650]
+
+# plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)), "cvrl/ss10q_fine.csv" using 1:(exp($4))
+
+rm = 1
+re = 1
+bm = 1
+be = 1
+e = 1
+c = 0
+
+rm = 2
+
+diff(x) = (rm * red(x) ** re - bm * blue(x) ** be) ** e
+
+fit diff(x) "cdf-529-62" using 1:2 via rm, re, bm, be, e
+
+plot "cdf-529-62" using 1:2, diff(x)
+
+# # diff(x) = blue(x) - 4 * red(x)
+# 
+# set logscale y
+# plot diff(x)
+# 
+# delta(x) = (1 /(abs(diff(x) - diff(x - .01)) / .01)) ** e
+# 
+# plot delta(x)
+# 
+# fit log(delta(x)) "nm-log" using 1:(log(1/$4)) via rm, re, bm, be, e
+# 
+# plot "nm-log" using 1:(1/$4), delta(x)
