@@ -55,14 +55,8 @@ eg(x) = 1 / ( \
      ea2 * exp(- (x - eu2) ** 2 / (2 * eo2 ** 2)) / (eo2 * sqrt(2 * pi)) ) / 8;
 
 fit log(eg(x)) "nm-log" using 1:(log($4)) via ea, eu, eo, ea1, eu1, eo1, ea2, eu2, eo2
+fit log(g(x)) "nm-steph-log" using 1:(log($4)) via a, u, o, a1, u1, o1, a2, u2, o2
 
-plot g(x), "nm-log" using 1:4, eg(x)
+plot g(x), "nm-log" using 1:4, eg(x), "nm-steph-log" using 1:4
 
-eg(x) = 1 / ( \
-     ea  * exp(- (x - eu ) ** 2 / (2 * eo  ** 2)) / (eo  * sqrt(2 * pi)) + \
-     ea1 * exp(- (x - eu1) ** 2 / (2 * eo1 ** 2)) / (eo1 * sqrt(2 * pi)) ) / 8;
-
-fit log(eg(x)) "nm-log" using 1:(log($4)) via ea, eu, eo, ea1, eu1, eo1
-
-plot g(x), "nm-log" using 1:4, eg(x)
 
