@@ -60,3 +60,18 @@ fit log(g(x)) "nm-steph-log" using 1:(log($4)) via a, u, o, a1, u1, o1, a2, u2, 
 plot g(x), "nm-log" using 1:4, eg(x), "nm-steph-log" using 1:4
 
 
+a               = 40
+b               = 19.0555   
+c               = 498.892   
+d               = 0.0549694 
+e               = 0.131036  
+
+f(x) = a - b * abs(atan((x - c) * d) - e)
+
+fit f(x) "nm-log" using 1:5 via a, b, c, d, e
+
+set yrange [10:45]
+unset logscale y
+set ytics (10, 20, 30, 40)
+
+plot "nm-log" using 1:5, f(x)
