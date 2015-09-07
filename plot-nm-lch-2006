@@ -54,7 +54,7 @@ eg(x) = 1 / ( \
      ea1 * exp(- (x - eu1) ** 2 / (2 * eo1 ** 2)) / (eo1 * sqrt(2 * pi)) + \
      ea2 * exp(- (x - eu2) ** 2 / (2 * eo2 ** 2)) / (eo2 * sqrt(2 * pi)) ) / 8;
 
-fit eg(x) "nm-log" using 1:4 via ea, eu, eo, ea1, eu1, eo1, ea2, eu2, eo2
+fit log(eg(x)) "nm-log" using 1:(log($4)) via ea, eu, eo, ea1, eu1, eo1, ea2, eu2, eo2
 
 plot g(x), "nm-log" using 1:4, eg(x)
 
@@ -62,7 +62,7 @@ eg(x) = 1 / ( \
      ea  * exp(- (x - eu ) ** 2 / (2 * eo  ** 2)) / (eo  * sqrt(2 * pi)) + \
      ea1 * exp(- (x - eu1) ** 2 / (2 * eo1 ** 2)) / (eo1 * sqrt(2 * pi)) ) / 8;
 
-fit eg(x) "nm-log" using 1:4 via ea, eu, eo, ea1, eu1, eo1
+fit log(eg(x)) "nm-log" using 1:(log($4)) via ea, eu, eo, ea1, eu1, eo1
 
 plot g(x), "nm-log" using 1:4, eg(x)
 
