@@ -60,11 +60,11 @@ fit log(g(x)) "nm-steph-log" using 1:(log($4)) via a, u, o, a1, u1, o1, a2, u2, 
 plot g(x), "nm-log" using 1:4, eg(x), "nm-steph-log" using 1:4
 
 
-a               = 40
-b               = 19.0555   
-c               = 498.892   
-d               = 0.0549694 
-e               = 0.131036  
+a               = 42.7814   
+b               = 15.339    
+c               = 498.528   
+d               = 0.133987  
+e               = 0.194536  
 
 f(x) = a - b * abs(atan((x - c) * d) - e)
 
