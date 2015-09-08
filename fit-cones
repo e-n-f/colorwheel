@@ -46,9 +46,24 @@ blue_o1         = 34.8191
 
 fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1
 
+
+rod_a           = 1.52372
+rod_u           = 439.008
+rod_o           = 10.8191
+rod_a1          = 18.6703
+rod_u1          = 460.534
+rod_o1          = 28.39  
+rod_a2          = 92.6568
+rod_u2          = 509.578
+rod_o2          = 39.6545
+
+rod(x) = rod_a * exp(- (x - rod_u) ** 2 / (2 * rod_o ** 2)) / (rod_o * sqrt(2 * pi)) + rod_a1 * exp(- (x - rod_u1) ** 2 / (2 * rod_o1 ** 2)) / (rod_o1 * sqrt(2 * pi)) + rod_a2 * exp(- (x - rod_u2) ** 2 / (2 * rod_o2 ** 2)) / (rod_o2 * sqrt(2 * pi))
+
+fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, rod_o1, rod_a2, rod_u2, rod_o2
+
 set xrange [425:650]
 
-# plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)), "cvrl/ss10q_fine.csv" using 1:(exp($4))
+plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)), "cvrl/ss10q_fine.csv" using 1:(exp($4)), rod(x), "rod-sensitivity" using 1:2
 
 rm = 1
 re = 1
@@ -62,8 +77,13 @@ rm = 2
 diff(x) = (rm * red(x) ** re - bm * blue(x) ** be) ** e
 
 fit diff(x) "cdf-529-62" using 1:2 via rm, re, bm, be, e
-
 plot "cdf-529-62" using 1:2, diff(x)
+
+fit diff(x) "cdf-478-475" using 1:2 via rm, re, bm, be, e
+plot "cdf-478-475" using 1:2, diff(x)
+
+fit diff(x) "cdf-475-22" using 1:2 via rm, re, bm, be, e
+plot "cdf-475-22" using 1:2, diff(x)
 
 # # diff(x) = blue(x) - 4 * red(x)
 # 
