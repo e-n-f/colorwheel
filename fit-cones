@@ -26,25 +26,35 @@ red_o2          = 34.3415
 
 fit red(x) "cvrl/ss10q_fine.csv" using 1:(exp($2)) via red_a, red_u, red_o, red_a1, red_u1, red_o1, red_a2, red_u2, red_o2
 
-blue(x) = blue_a * exp(- (x - blue_u) ** 2 / (2 * blue_o ** 2)) / (blue_o * sqrt(2 * pi)) + blue_a1 * exp(- (x - blue_u1) ** 2 / (2 * blue_o1 ** 2)) / (blue_o1 * sqrt(2 * pi))
+green(x) = green_a * exp(- (x - green_u) ** 2 / (2 * green_o ** 2)) / (green_o * sqrt(2 * pi)) + green_a1 * exp(- (x - green_u1) ** 2 / (2 * green_o1 ** 2)) / (green_o1 * sqrt(2 * pi)) + green_a2 * exp(- (x - green_u2) ** 2 / (2 * green_o2 ** 2)) / (green_o2 * sqrt(2 * pi))
+
+green_a         = 140.635
+green_u         = 540.11 
+green_o         = 55.9674
+green_a1        = 4.4454 
+green_u1        = 430.908
+green_o1        = 19.2248
+green_a2        = 9.85306
+green_u2        = 459.542
+green_o2        = 28.6929
+
+fit green(x) "cvrl/ss10q_fine.csv" using 1:(exp($3)) via green_a, green_u, green_o, green_a1, green_u1, green_o1, green_a2, green_u2, green_o2
+
+blue(x) = blue_a * exp(- (x - blue_u) ** 2 / (2 * blue_o ** 2)) / (blue_o * sqrt(2 * pi)) + blue_a1 * exp(- (x - blue_u1) ** 2 / (2 * blue_o1 ** 2)) / (blue_o1 * sqrt(2 * pi)) + blue_a2 * exp(- (x - blue_u2) ** 2 / (2 * blue_o2 ** 2)) / (blue_o2 * sqrt(2 * pi))
 
 # blue cone
 
-blue_a               = 38.1588
-blue_u               = 434.277
-blue_o               = 24.4683
-blue_a1              = 50.0002
-blue_u1              = 468.568
-blue_o1              = 36.3005
+blue_a          = 9.66919 
+blue_u          = 422.085 
+blue_o          = 16.0911 
+blue_a1         = 28.011  
+blue_u1         = 475.884 
+blue_o1         = 38.6482 
+blue_a2         = 45.924  
+blue_u2         = 448.202 
+blue_o2         = 26.0385 
 
-blue_a          = 42.4711 
-blue_u          = 437.516 
-blue_o          = 24.9774 
-blue_a1         = 41.32   
-blue_u1         = 469.348 
-blue_o1         = 34.8191 
-
-fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1
+fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1, blue_a2, blue_u2, blue_o2
 
 
 rod_a           = 1.52372
@@ -63,7 +73,7 @@ fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, 
 
 set xrange [425:650]
 
-plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)), "cvrl/ss10q_fine.csv" using 1:(exp($4)), rod(x), "rod-sensitivity" using 1:2
+plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
 rm = 1
 re = 1
