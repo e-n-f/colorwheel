@@ -107,3 +107,15 @@ plot "cdf-475-22" using 1:2, diff(x)
 # fit log(delta(x)) "nm-log" using 1:(log(1/$4)) via rm, re, bm, be, e
 # 
 # plot "nm-log" using 1:(1/$4), delta(x)
+
+undefine a, b, c, d, e
+bal(x) = abs((a * blue(x) + b * green(x)) - (c * rod(x))) ** d
+
+a               = 77665.6  
+b               = 97131.9  
+c               = 104264   
+d               = 0.146085 
+
+fit (1/bal(x)) "nm-log" using 1:(1/(100 / $5)) via a, b, c, d
+plot "nm-log" using 1:(100 / $5), bal(x)
+plot a * blue(x) + b * green(x), c * rod(x)
