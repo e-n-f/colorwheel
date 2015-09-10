@@ -1,6 +1,39 @@
 set terminal postscript
 
+
+g(x) = \
+     a  * exp(- (x - u ) ** 2 / (2 * o  ** 2)) / (o  * sqrt(2 * pi)) + \
+     a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + \
+     a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi)) + \
+     a3 * exp(- (x - u3) ** 2 / (2 * o3 ** 2)) / (o3 * sqrt(2 * pi)) + \
+     a4 * exp(- (x - u4) ** 2 / (2 * o4 ** 2)) / (o4 * sqrt(2 * pi)) + \
+     a5 * exp(- (x - u5) ** 2 / (2 * o5 ** 2)) / (o5 * sqrt(2 * pi)) + \
+     0
+
+a               = 4.12617
+u               = 638.483
+o               = 7.09479
+a1              = 8.98427
+u1              = 439.612
+o1              = 12.9283
+a2              = 21.314 
+u2              = 493.304
+o2              = 14.5033
+a3              = 4.24393
+u3              = 586.235
+o3              = 6.44049
+a4              = 27.1204
+u4              = 585.845
+o4              = 24.0743
+a5              = 98.4812
+u5              = 472.367
+o5              = 137.602
+
+fit g(x) "jones-spectral-chroma" using 1:(1/$2) via a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3, a4, u4, o4, a5, u5, o5
+plot g(x), "jones-spectral-chroma" using 1:(1/$2)
+
 f(x) = a * (1 - (.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * (1 - (.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * (1 - (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
+
 
 a               = 1.51366   
 u               = 574.457   
@@ -58,6 +91,10 @@ fit 1/(eg(x)) "nm-log" using 1:(1/($4)) via ea, eu, eo, ea1, eu1, eo1, ea2, eu2,
 fit 1/(g(x)) "nm-steph-log" using 1:(1/($4)) via a, u, o, a1, u1, o1, a2, u2, o2
 
 plot g(x), "nm-log" using ($1 - .5 + rand(0)):($4 - .5 + rand(0)) ps .5, eg(x), "nm-steph-log" using 1:4
+
+
+
+
 
 
 a               = 42.7814   
