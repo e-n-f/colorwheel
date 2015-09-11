@@ -49,6 +49,18 @@ o2              = 21.5208
 fit f(x) "koenig-angle" using 2:5 via a, u, o, b, a1, u1, o1, a2, u2, o2
 plot f(x), "koenig-angle" using 2:5
 
+set xrange [400:750]
+
+set logscale y
+plot \
+     a  * exp(- (x - u ) ** 2 / (2 * o  ** 2)) / (o  * sqrt(2 * pi)) + \
+     a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + \
+     a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi)) + \
+     0
+unset logscale y
+
+unset xrange
+
 f(x) = a * (1 - (.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * (1 - (.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * (1 - (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
 
 
