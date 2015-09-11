@@ -32,6 +32,23 @@ o5              = 137.602
 fit g(x) "jones-spectral-chroma" using 1:(1/$2) via a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3, a4, u4, o4, a5, u5, o5
 plot g(x), "jones-spectral-chroma" using 1:(1/$2)
 
+
+f(x) = a * ((.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * ((.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * ((.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
+
+a               = 2.0884    
+u               = 495.496   
+o               = 1.08203   
+b               = -0.753913 
+a1              = 1.03246   
+u1              = 588.278   
+o1              = 26.0332   
+a2              = 1.15567   
+u2              = 500.066   
+o2              = 21.5208   
+
+fit f(x) "koenig-angle" using 2:5 via a, u, o, b, a1, u1, o1, a2, u2, o2
+plot f(x), "koenig-angle" using 2:5
+
 f(x) = a * (1 - (.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * (1 - (.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * (1 - (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
 
 
