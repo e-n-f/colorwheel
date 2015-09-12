@@ -75,49 +75,68 @@ set xrange [425:650]
 
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
-rm = 1
-re = 1
-bm = 1
-be = 1
-e = 1
-c = 0
-
-rm = 2
-
-diff(x) = (rm * red(x) ** re - bm * blue(x) ** be) ** e
-
-fit diff(x) "cdf-529-62" using 1:2 via rm, re, bm, be, e
-plot "cdf-529-62" using 1:2, diff(x)
-
-fit diff(x) "cdf-478-475" using 1:2 via rm, re, bm, be, e
-plot "cdf-478-475" using 1:2, diff(x)
-
-fit diff(x) "cdf-475-22" using 1:2 via rm, re, bm, be, e
-plot "cdf-475-22" using 1:2, diff(x)
-
-# # diff(x) = blue(x) - 4 * red(x)
+# rm = 1
+# re = 1
+# bm = 1
+# be = 1
+# e = 1
+# c = 0
 # 
-# set logscale y
-# plot diff(x)
+# rm = 2
 # 
-# delta(x) = (1 /(abs(diff(x) - diff(x - .01)) / .01)) ** e
+# diff(x) = (rm * red(x) ** re - bm * blue(x) ** be) ** e
 # 
-# plot delta(x)
+# fit diff(x) "cdf-529-62" using 1:2 via rm, re, bm, be, e
+# plot "cdf-529-62" using 1:2, diff(x)
 # 
-# fit log(delta(x)) "nm-log" using 1:(log(1/$4)) via rm, re, bm, be, e
+# fit diff(x) "cdf-478-475" using 1:2 via rm, re, bm, be, e
+# plot "cdf-478-475" using 1:2, diff(x)
 # 
-# plot "nm-log" using 1:(1/$4), delta(x)
+# fit diff(x) "cdf-475-22" using 1:2 via rm, re, bm, be, e
+# plot "cdf-475-22" using 1:2, diff(x)
+# 
+# # # diff(x) = blue(x) - 4 * red(x)
+# # 
+# # set logscale y
+# # plot diff(x)
+# # 
+# # delta(x) = (1 /(abs(diff(x) - diff(x - .01)) / .01)) ** e
+# # 
+# # plot delta(x)
+# # 
+# # fit log(delta(x)) "nm-log" using 1:(log(1/$4)) via rm, re, bm, be, e
+# # 
+# # plot "nm-log" using 1:(1/$4), delta(x)
+# 
+# undefine a, b, c, aa, bb, cc
+# bal(x) = ((a * blue(x) ** aa + b * red(x) ** bb) - (c * rod(x)) ** cc)
+# 
+# a               = 0.883833    
+# b               = 4.33976     
+# c               = 1.02621     
+# aa              = 1.40036     
+# bb              = -0.0976907  
+# cc              = 21.1082     
+# 
+# fit (bal(x)) "nm-log" using 1:((100 / $5)) via a, b, c, aa, bb, cc
+# plot "nm-log" using 1:(100 / $5), bal(x)
+# plot a * blue(x) ** aa + b * red(x) ** bb, c * rod(x) ** cc, a * blue(x) ** aa, b * red(x) ** bb
 
-undefine a, b, c, aa, bb, cc
-bal(x) = ((a * blue(x) ** aa + b * red(x) ** bb) - (c * rod(x)) ** cc)
 
-a               = 0.883833    
-b               = 4.33976     
-c               = 1.02621     
-aa              = 1.40036     
-bb              = -0.0976907  
-cc              = 21.1082     
+# luminous efficiency
 
-fit (bal(x)) "nm-log" using 1:((100 / $5)) via a, b, c, aa, bb, cc
-plot "nm-log" using 1:(100 / $5), bal(x)
-plot a * blue(x) ** aa + b * red(x) ** bb, c * rod(x) ** cc, a * blue(x) ** aa, b * red(x) ** bb
+lum(x) = lum_a * exp(- (x - lum_u) ** 2 / (2 * lum_o ** 2)) / (lum_o * sqrt(2 * pi)) + lum_a1 * exp(- (x - lum_u1) ** 2 / (2 * lum_o1 ** 2)) / (lum_o1 * sqrt(2 * pi)) + lum_a2 * exp(- (x - lum_u2) ** 2 / (2 * lum_o2 ** 2)) / (lum_o2 * sqrt(2 * pi))
+
+lum_a           = 5.6274   
+lum_u           = 528.018  
+lum_o           = 18.9484  
+lum_a1          = 110.766  
+lum_u1          = 573.922  
+lum_o1          = 57.4626  
+lum_a2          = 62.7112  
+lum_u2          = 492.618  
+lum_o2          = 85.0791  
+
+
+fit lum(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via lum_a, lum_u, lum_o, lum_a1, lum_u1, lum_o1, lum_a2 ,lum_u2, lum_o2
+plot "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) with lines, lum(x)
