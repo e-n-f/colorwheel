@@ -71,7 +71,7 @@ rod(x) = rod_a * exp(- (x - rod_u) ** 2 / (2 * rod_o ** 2)) / (rod_o * sqrt(2 * 
 
 fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, rod_o1, rod_a2, rod_u2, rod_o2
 
-set xrange [425:650]
+set xrange [400:800]
 
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
@@ -140,3 +140,19 @@ lum_o2          = 85.0791
 
 fit lum(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via lum_a, lum_u, lum_o, lum_a1, lum_u1, lum_o1, lum_a2 ,lum_u2, lum_o2
 plot "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) with lines, lum(x)
+
+
+lum2(x) = r * red(x) ** rr + g * green(x) ** gg + b * blue(x) ** bb + rd * rod(x) ** rdrd
+
+r               = 0.861847     
+g               = 0.0729354    
+b               = 0.082525     
+rd              = 0.0203466    
+rr              = 1.26659      
+gg              = 8.34893      
+bb              = -0.00916284  
+rdrd            = 1.80894      
+
+fit lum2(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via r, g, b, rd, rr, gg, bb, rdrd
+
+plot "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) with lines, lum2(x)
