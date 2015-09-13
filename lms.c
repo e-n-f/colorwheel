@@ -417,6 +417,11 @@ void RGBtoLMS(double r, double g, double b, double *l, double *m, double *s) {
 	*l = 1.017175 * r - 0.017223 * g + 0.000048 * b;
 	*m = 1.409345 * r - 0.410486 * g + 0.001141 * b;
 	*s = 0.057309 * r - 0.051593 * g + 0.994284 * b;
+
+	// stockman-stiles 1999
+	*l = 2.846201 * r + 11.092490 * g + b;
+	*m = 0.168926 * r +  8.265895 * g + b;
+	*s = 0.000000 * r +  0.010600 * g + b;
 }
 
 void LMStoRGB(double l, double m, double s, double *r, double *g, double *b) {
@@ -430,6 +435,11 @@ void LMStoRGB(double l, double m, double s, double *r, double *g, double *b) {
 	*g =  0.485478 * l + 0.513799 * m + 0.000823 * s;
 	*b =  0.050188 * l + 0.077054 * m + 0.872758 * s;
 
+	// wolfram alpha inversion of stockman-stiles 1999
+	*r =  0.381762     * l - 0.512476   * m + 0.130714 * s;
+	*g = -0.00781889   * l + 0.131621   * m - 0.123809 * s;
+	*b =  0.0000828061 * l - 0.00139518 * m + 1.00131 * s;
+
 	if (*r < 0) { *r = 0; }
 	if (*g < 0) { *g = 0; }
 	if (*b < 0) { *b = 0; }
@@ -437,6 +447,31 @@ void LMStoRGB(double l, double m, double s, double *r, double *g, double *b) {
 	if (*g > 1) { *g = 1; }
 	if (*b > 1) { *b = 1; }
 }
+
+#if 0
+double hollowU(int i, int j, double *v) {
+	double num = v[j];
+
+}
+
+double v(double j, double *u, double *v) {
+	int i, n;
+	double num = 0;
+	double denom = 0;
+
+	for (i = 1; i <= 3; i++) {
+		num += hollowU(i, j, v) * u[i];
+	}
+
+	for (n = 1; n <= 3; n++) {
+		for (i = 1; i <= 3; i++) {
+			denom += hollowU(i, n, v) * u[i];
+		}
+	}
+
+	return num/denom;
+}
+#endif
 
 
 void convert(unsigned char *buf, int width, int height) {
@@ -452,8 +487,6 @@ void convert(unsigned char *buf, int width, int height) {
 
 			double l, m, s;
 			RGBtoLMS(R, G, B, &l, &m, &s);
-
-			// m = 0;
 
 			LMStoRGB(l, m, s, &R, &G, &B);
 			RGBtosRGB(R, G, B, &r, &g, &b);
