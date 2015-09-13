@@ -127,15 +127,15 @@ plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/
 
 lum(x) = lum_a * exp(- (x - lum_u) ** 2 / (2 * lum_o ** 2)) / (lum_o * sqrt(2 * pi)) + lum_a1 * exp(- (x - lum_u1) ** 2 / (2 * lum_o1 ** 2)) / (lum_o1 * sqrt(2 * pi)) + lum_a2 * exp(- (x - lum_u2) ** 2 / (2 * lum_o2 ** 2)) / (lum_o2 * sqrt(2 * pi))
 
-lum_a           = 5.6274   
-lum_u           = 528.018  
-lum_o           = 18.9484  
-lum_a1          = 110.766  
-lum_u1          = 573.922  
-lum_o1          = 57.4626  
-lum_a2          = 62.7112  
-lum_u2          = 492.618  
-lum_o2          = 85.0791  
+lum_a           = 8.49731    
+lum_u           = 524.519    
+lum_o           = 21.9876    
+lum_a1          = 144.265    
+lum_u1          = 567.224    
+lum_o1          = 60.184     
+lum_a2          = 18.4809    
+lum_u2          = 448.06     
+lum_o2          = 36.9217    
 
 
 fit lum(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via lum_a, lum_u, lum_o, lum_a1, lum_u1, lum_o1, lum_a2 ,lum_u2, lum_o2
@@ -144,14 +144,14 @@ plot "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) with lines, lum(x)
 
 lum2(x) = r * red(x) ** rr + g * green(x) ** gg + b * blue(x) ** bb + rd * rod(x) ** rdrd
 
-r               = 0.861847     
-g               = 0.0729354    
-b               = 0.082525     
-rd              = 0.0203466    
-rr              = 1.26659      
-gg              = 8.34893      
-bb              = -0.00916284  
-rdrd            = 1.80894      
+r               = 0.91628     
+g               = 0.0880332   
+b               = 0.0457003   
+rd              = -0.0189855  
+rr              = 1.0998      
+gg              = 6.75714     
+bb              = 0.0510658   
+rdrd            = 0.214086    
 
 fit lum2(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via r, g, b, rd, rr, gg, bb, rdrd
 
