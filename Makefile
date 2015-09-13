@@ -10,6 +10,9 @@ PNG_LIBS := $(shell pkg-config --libs libpng)
 JPEG_CFLAGS = -I/usr/local/Cellar/jpeg/8d/include/
 JPEG_LIBS = -L/usr/local/Cellar/jpeg/8d/lib/
 
+lms: lms.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o lms lms.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
 simulate: simulate.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o simulate simulate.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
