@@ -8,8 +8,8 @@
 
 <form action="/cgi-bin/nm.cgi" method="post">
 
-<input type="Submit" name="success" value="There are two distinct hues">
-<input type="Submit" name="success" value="Hopeless">
+<input type="Submit" name="success" value="There are two distinct colors">
+<input type="Submit" name="success" value="Give up and try another">
 
 <p>
 
@@ -18,6 +18,7 @@
 <input type="text" name="L" id="L">
 <input type="text" name="nmdiff" id="nmdiff">
 <input type="text" name="chdiff" id="chdiff">
+<input type="text" name="ldiff" id="ldiff">
 
 </form>
 
@@ -26,6 +27,7 @@ var c_canvas = document.getElementById("xyz");
 var context = c_canvas.getContext("2d");
 
 var mode = Math.random();
+mode = .4;
 
 context.fillStyle = "#fff";
 context.fillRect(0, 0, 500, 500);
@@ -176,15 +178,18 @@ function XYZtoRGB(X, Y, Z) {
 		b = (b * 12.92);
 	}
 
+	var fail = 0;
+
 	if (r < 0 || g < 0 || b < 0 || r > 1 || g > 1 || b > 1) {
 		r = g = b = 0;
+		fail = 1;
 	}
 
 	r = (r < 0) ? 0 : r;
 	g = (g < 0) ? 0 : g;
 	b = (b < 0) ? 0 : b;
 
-	return [r * 255, g * 255, b * 255];
+	return [r * 255, g * 255, b * 255, fail];
 }
 
 var NMtoXYZ = {
@@ -636,6 +641,13 @@ var l2, c2, nm2;
 
 function setup() {
 	nm1 = Math.floor(Math.random() * (694 - 411) + 411);
+
+if (0) {
+	nm1 = Math.floor(Math.random() * (600 - 450) + 450);
+	nm1 = Math.floor(Math.random() * (500 - 460) + 460);
+	nm1 = Math.floor(Math.random() * (480 - 460) + 460);
+}
+
 	nm2 = nm1;
 
 	l1 = l2 = 74;
@@ -700,12 +712,17 @@ function display() {
 	document.getElementById("L").value = (l1 + l2) / 2;
 	document.getElementById("nmdiff").value = (nm2 - nm1) == 0 ? '-' : (nm2 - nm1);
 	document.getElementById("chdiff").value = (c2 - c1) == 0 ? '-' : (c2 - c1);
+	document.getElementById("ldiff").value = (l2 - l1) == 0 ? '-' : (l2 - l1);
 }
 
 function less() {
-	if (mode >= .5) {
+	if (mode >= .666) {
 		if (nm2 > nm1) {
 			nm1++;
+		}
+	} else if (mode >= .333) {
+		if (l1 < l2) {
+			l1++;
 		}
 	} else {
 		if (c1 < c2) {
@@ -717,11 +734,23 @@ function less() {
 }
 
 function more() {
-	if (mode >= .5) {
-		if (nm1 > 411) {
-			nm1--;
-		} else if (nm2 < 694) {
+	if (mode >= .666) {
+		if (nm2 < 694) {
 			nm2++;
+		} else if (nm1 > 411) {
+			nm1--;
+		}
+	} else if (mode >= .333) {
+		var lch1 = nmtolch(l1 - 1, c1, nm1);
+		var rgb1 = LCHtoRGB(lch1[0], lch1[1], lch1[2]);
+		if (l1 > 0 && rgb1[3] != 1) {
+			l1--;
+		} else {
+			var lch2 = nmtolch(l2 + 1, c2, nm2);
+			var rgb2 = LCHtoRGB(lch2[0], lch2[1], lch2[2]);
+			if (l2 < 100 && rgb2[3] != 1) {
+				l2++;
+			}
 		}
 	} else {
 		if (c1 > 0) {
