@@ -73,23 +73,22 @@ fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, 
 
 set xrange [425:650]
 
-base            = 8.61361      
-redm            = 4.47038      
-greenm          = -29.9922     
-bluem           = -11.6935     
-rodm            = 22.1306      
-bcred           = -1.60513e-05 
-bcgreen         = 0.233919     
-bcblue          = -3.44639e-05 
-bcrod           = 2.58621e-06  
-boxcox          = 0.68601      
+base            = 39.9219      
+redm            = 84.9315      
+greenm          = -107.996     
+bluem           = -16.2798     
+rodm            = 34.3902      
+bcred           = -1.59514e-05 
+bcgreen         = 0.1123       
+bcblue          = 2.25266e-06  
+bcrod           = 2.7501e-06   
+
 
 
 fn(x, boxcox) = (x ** abs(boxcox) - 1) / abs(boxcox)
-inv(x) = (abs(x * boxcox + 1)) ** (1 / boxcox)
-f(x) = base + inv(redm * fn(red(x), bcred) + greenm * fn(green(x), bcgreen) + bluem * fn(blue(x), bcblue) + rodm * fn(rod(x), bcrod))
+f(x) = base + (redm * fn(red(x), bcred) + greenm * fn(green(x), bcgreen) + bluem * fn(blue(x), bcblue) + rodm * fn(rod(x), bcrod))
 
-fit f(x) "jones-spectral-chroma" using 1:(127 - $0) via base, redm, greenm, bluem, rodm, bcred, bcgreen, bcblue, bcrod, boxcox
+fit f(x) "jones-spectral-chroma" using 1:(127 - $0) via base, redm, greenm, bluem, rodm, bcred, bcgreen, bcblue, bcrod
 plot "jones-spectral-chroma" using 1:(127 - $0), f(x)
 plot (f(x) - f(x - .01)) / .01
 
