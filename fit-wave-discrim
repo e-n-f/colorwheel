@@ -1,0 +1,102 @@
+set terminal postscript color
+
+# red cone
+
+red(x) = red_a * exp(- (x - red_u) ** 2 / (2 * red_o ** 2)) / (red_o * sqrt(2 * pi)) + red_a1 * exp(- (x - red_u1) ** 2 / (2 * red_o1 ** 2)) / (red_o1 * sqrt(2 * pi)) + red_a2 * exp(- (x - red_u2) ** 2 / (2 * red_o2 ** 2)) / (red_o2 * sqrt(2 * pi))
+
+red_a               = 134.537
+red_u               = 579.602
+red_o               = 56.0143
+red_a1              = 20.5603
+red_u1              = 448.421
+red_o1              = 34.2699
+red_a2              = 18.5586
+red_u2              = 520.914
+red_o2              = 27.3367
+
+red_a           = 133.421  
+red_u           = 577.919  
+red_o           = 56.3307  
+red_a1          = 16.8785  
+red_u1          = 440.553  
+red_o1          = 28.4663  
+red_a2          = 28.3008  
+red_u2          = 507.765  
+red_o2          = 34.3415  
+
+fit red(x) "cvrl/ss10q_fine.csv" using 1:(exp($2)) via red_a, red_u, red_o, red_a1, red_u1, red_o1, red_a2, red_u2, red_o2
+
+green(x) = green_a * exp(- (x - green_u) ** 2 / (2 * green_o ** 2)) / (green_o * sqrt(2 * pi)) + green_a1 * exp(- (x - green_u1) ** 2 / (2 * green_o1 ** 2)) / (green_o1 * sqrt(2 * pi)) + green_a2 * exp(- (x - green_u2) ** 2 / (2 * green_o2 ** 2)) / (green_o2 * sqrt(2 * pi))
+
+green_a         = 140.635
+green_u         = 540.11 
+green_o         = 55.9674
+green_a1        = 4.4454 
+green_u1        = 430.908
+green_o1        = 19.2248
+green_a2        = 9.85306
+green_u2        = 459.542
+green_o2        = 28.6929
+
+fit green(x) "cvrl/ss10q_fine.csv" using 1:(exp($3)) via green_a, green_u, green_o, green_a1, green_u1, green_o1, green_a2, green_u2, green_o2
+
+blue(x) = blue_a * exp(- (x - blue_u) ** 2 / (2 * blue_o ** 2)) / (blue_o * sqrt(2 * pi)) + blue_a1 * exp(- (x - blue_u1) ** 2 / (2 * blue_o1 ** 2)) / (blue_o1 * sqrt(2 * pi)) + blue_a2 * exp(- (x - blue_u2) ** 2 / (2 * blue_o2 ** 2)) / (blue_o2 * sqrt(2 * pi))
+
+# blue cone
+
+blue_a          = 9.66919 
+blue_u          = 422.085 
+blue_o          = 16.0911 
+blue_a1         = 28.011  
+blue_u1         = 475.884 
+blue_o1         = 38.6482 
+blue_a2         = 45.924  
+blue_u2         = 448.202 
+blue_o2         = 26.0385 
+
+fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1, blue_a2, blue_u2, blue_o2
+
+
+rod_a           = 1.52372
+rod_u           = 439.008
+rod_o           = 10.8191
+rod_a1          = 18.6703
+rod_u1          = 460.534
+rod_o1          = 28.39  
+rod_a2          = 92.6568
+rod_u2          = 509.578
+rod_o2          = 39.6545
+
+rod(x) = rod_a * exp(- (x - rod_u) ** 2 / (2 * rod_o ** 2)) / (rod_o * sqrt(2 * pi)) + rod_a1 * exp(- (x - rod_u1) ** 2 / (2 * rod_o1 ** 2)) / (rod_o1 * sqrt(2 * pi)) + rod_a2 * exp(- (x - rod_u2) ** 2 / (2 * rod_o2 ** 2)) / (rod_o2 * sqrt(2 * pi))
+
+fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, rod_o1, rod_a2, rod_u2, rod_o2
+
+set xrange [425:650]
+
+base            = 8.61361      
+redm            = 4.47038      
+greenm          = -29.9922     
+bluem           = -11.6935     
+rodm            = 22.1306      
+bcred           = -1.60513e-05 
+bcgreen         = 0.233919     
+bcblue          = -3.44639e-05 
+bcrod           = 2.58621e-06  
+boxcox          = 0.68601      
+
+
+fn(x, boxcox) = (x ** abs(boxcox) - 1) / abs(boxcox)
+inv(x) = (abs(x * boxcox + 1)) ** (1 / boxcox)
+f(x) = base + inv(redm * fn(red(x), bcred) + greenm * fn(green(x), bcgreen) + bluem * fn(blue(x), bcblue) + rodm * fn(rod(x), bcrod))
+
+fit f(x) "jones-spectral-chroma" using 1:(127 - $0) via base, redm, greenm, bluem, rodm, bcred, bcgreen, bcblue, bcrod, boxcox
+plot "jones-spectral-chroma" using 1:(127 - $0), f(x)
+plot (f(x) - f(x - .01)) / .01
+
+set logscale y
+plot .01 / (f(x) - f(x - .01)), "jones-spectral-chroma" using 1:2
+
+greenm = 0
+
+plot .01 / (f(x) - f(x - .01))
+
