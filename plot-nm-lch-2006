@@ -16,7 +16,7 @@ o               = 7.09479
 a1              = 8.98427
 u1              = 439.612
 o1              = 12.9283
-a2              = 21.314 
+a2              = 21.314
 u2              = 493.304
 o2              = 14.5033
 a3              = 4.24393
@@ -32,22 +32,52 @@ o5              = 137.602
 fit g(x) "jones-spectral-chroma" using 1:(1/$2) via a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3, a4, u4, o4, a5, u5, o5
 plot g(x), "jones-spectral-chroma" using 1:(1/$2)
 
+a               = 0.152328
+u               = 641.15
+o               = 7.15298
+a1              = 0.329166
+u1              = 431.411
+o1              = 11.57
+a2              = 2.28925
+u2              = 489.57
+o2              = 16.8979
+a3              = 0.400745
+u3              = 585.284
+o3              = 9.6969
+a4              = 2.11197
+u4              = 580.463
+o4              = 22.0747
+a5              = 16.5988
+u5              = 457.27
+o5              = 214.628
+
 fit g(x) "steindler-wavelength-discrimination" using 1:(1/$2) via a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3, a4, u4, o4, a5, u5, o5
 plot g(x), "steindler-wavelength-discrimination" using 1:(1/$2)
+
+a               = 0.660237 
+a1              = 5.57096  
+a2              = 45.1087  
+a3              = 14.8944  
+a4              = 25.1849  
+a5              = 153.331  
+
+fit g(x) "pokorny-smith-wavelength-discrimination" using 1:(1/$2) via a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3, a4, u4, o4, a5, u5, o5
+plot g(x), "pokorny-smith-wavelength-discrimination" using 1:(1/$2)
+
 
 
 f(x) = a * ((.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * ((.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * ((.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
 
-a               = 2.0884    
-u               = 495.496   
-o               = 1.08203   
-b               = -0.753913 
-a1              = 1.03246   
-u1              = 588.278   
-o1              = 26.0332   
-a2              = 1.15567   
-u2              = 500.066   
-o2              = 21.5208   
+a               = 2.0884
+u               = 495.496
+o               = 1.08203
+b               = -0.753913
+a1              = 1.03246
+u1              = 588.278
+o1              = 26.0332
+a2              = 1.15567
+u2              = 500.066
+o2              = 21.5208
 
 fit f(x) "koenig-angle" using 2:5 via a, u, o, b, a1, u1, o1, a2, u2, o2
 plot f(x), "koenig-angle" using 2:5
@@ -67,16 +97,16 @@ unset xrange
 f(x) = a * (1 - (.5 + .5 * erf((x - u) / (sqrt(2) * o)))) + a1 * (1 - (.5 + .5 * erf((x - u1) / (sqrt(2) * o1)))) + a2 * (1 - (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))) + b
 
 
-a               = 1.51366   
-u               = 574.457   
-o               = 29.2535   
-a1              = 1.7271    
-u1              = 473.458   
-o1              = 6.20547   
-b               = 0.680437  
-a2              = 1.68852   
-u2              = 497.363   
-o2              = 39.4372   
+a               = 1.51366
+u               = 574.457
+o               = 29.2535
+a1              = 1.7271
+u1              = 473.458
+o1              = 6.20547
+b               = 0.680437
+a2              = 1.68852
+u2              = 497.363
+o2              = 39.4372
 
 fit f(x) "nm-lch-2006" using 1:4 via a, u, o, a1, u1, o1, b, a2, u2, o2
 plot "nm-lch-2006" using 1:4 with lines, f(x)
@@ -104,15 +134,15 @@ ea2 = a2
 eu2 = u2
 eo2 = o2
 
-ea              = 0.672909      
-eu              = 524.391       
-eo              = 77.0208       
-ea1             = 0.0996442     
-eu1             = 479.451       
-eo1             = 3.50504       
-ea2             = 0.291203      
-eu2             = 483.885       
-eo2             = 20.9288       
+ea              = 0.672909
+eu              = 524.391
+eo              = 77.0208
+ea1             = 0.0996442
+eu1             = 479.451
+eo1             = 3.50504
+ea2             = 0.291203
+eu2             = 483.885
+eo2             = 20.9288
 
 eg(x) = 1 / ( \
      ea  * exp(- (x - eu ) ** 2 / (2 * eo  ** 2)) / (eo  * sqrt(2 * pi)) + \
@@ -129,11 +159,11 @@ plot g(x), "nm-log" using ($1 - .5 + rand(0)):($4 - .5 + rand(0)) ps .5, eg(x), 
 
 
 
-a               = 42.7814   
-b               = 15.339    
-c               = 498.528   
-d               = 0.133987  
-e               = 0.194536  
+a               = 42.7814
+b               = 15.339
+c               = 498.528
+d               = 0.133987
+e               = 0.194536
 
 f(x) = a - b * abs(atan((x - c) * d) - e)
 
