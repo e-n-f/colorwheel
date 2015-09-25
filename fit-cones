@@ -71,9 +71,22 @@ rod(x) = rod_a * exp(- (x - rod_u) ** 2 / (2 * rod_o ** 2)) / (rod_o * sqrt(2 * 
 
 fit rod(x) "rod-sensitivity" using 1:2 via rod_a, rod_u, rod_o, rod_a1, rod_u1, rod_o1, rod_a2, rod_u2, rod_o2
 
-set xrange [400:800]
+set xrange [400:700]
 
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
+
+min(x,y) = (x > y) ? (x - y) : 0
+rg(x) = - (-1.2 * red(x) + min(1.6 * green(x), 0.4 * blue(x)))
+yb(x) = 0.20 * (0.24 * red(x) + 0.18 * green(x)) - 0.06 * 0.7 * blue(x) - 0.075 * green(x)
+lt(x) = 0.6 * red(x) + 0.4 * green(x)
+
+plot rg(x)
+plot yb(x)
+
+dist(x, y) = sqrt((rg(x) - rg(y)) ** 2 + (yb(x) - yb(y)) ** 2 + (lt(x) - lt(y)) ** 2)
+del(x) = dist(x, x - 0.01) / 0.01
+
+plot 1/del(x)
 
 # rm = 1
 # re = 1
