@@ -75,10 +75,29 @@ set xrange [400:700]
 
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
+
+##########################
+#
+# 1-s2.0-004269897790013X-main.pdf
+# Ingling and Tsou
+
+rg1 = 1.2
+rg2 = 1.6
+rg3 = 0.4
+k1 = 0.20
+k2 = 0.06
+yb1 = 0.24
+yb2 = 0.18
+yb3 = 0.7
+yb4 = 0.075
+l1 = 0.6
+l2 = 0.4
+m = 0.1
+
 min(x,y) = (x > y) ? (x - y) : 0
-rg(x) = - (-1.2 * red(x) + min(1.6 * green(x), 0.4 * blue(x)))
-yb(x) = 0.20 * (0.24 * red(x) + 0.18 * green(x)) - 0.06 * 0.7 * blue(x) - 0.075 * green(x)
-lt(x) = 0.6 * red(x) + 0.4 * green(x)
+rg(x) = - (-rg1 * red(x) + min(rg2 * green(x), rg3 * blue(x)))
+yb(x) = k1 * (yb1 * red(x) + yb2 * green(x)) - k2 * yb3 * blue(x) - yb4 * green(x)
+lt(x) = l1 * red(x) + l2 * green(x)
 
 plot rg(x)
 plot yb(x)
@@ -86,7 +105,28 @@ plot yb(x)
 dist(x, y) = sqrt((rg(x) - rg(y)) ** 2 + (yb(x) - yb(y)) ** 2 + (lt(x) - lt(y)) ** 2)
 del(x) = dist(x, x - 0.01) / 0.01
 
-plot 1/del(x)
+plot m/del(x), "steindler-wavelength-discrimination" using 1:2
+
+rg1             = 39.3592
+rg2             = 62.813
+rg3             = -7.9613
+k1              = 3.99496
+k2              = 1.51212
+yb1             = 5.21648
+yb2             = 0.020545
+yb3             = 17.6414
+yb4             = 0.19119
+m               = 8.89235
+
+# Stockman-Sharpe V*
+l1 = 1.5
+l2 = 1
+
+fit m/del(x) "steindler-wavelength-discrimination" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb2, yb3, yb4, m
+
+plot m/del(x), "steindler-wavelength-discrimination" using 1:2
+
+exit
 
 # rm = 1
 # re = 1
