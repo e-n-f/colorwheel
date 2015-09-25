@@ -126,6 +126,26 @@ fit m/del(x) "steindler-wavelength-discrimination" using 1:2 via rg1, rg2, rg3, 
 
 plot m/del(x), "steindler-wavelength-discrimination" using 1:2
 
+unset xrange
+unset yrange
+
+set label 1 "500 neutral" at rg(500),yb(500) point
+set label 3 "466 blue" at rg(466),yb(466) point
+set label 4 "489 green" at rg(489),yb(489) point
+set label 5 "560 yellow" at rg(560),yb(560) point
+set label 6 "609 red" at rg(609),yb(609) point
+plot "cvrl/sp.csv" using (rg($1)):(yb($1))
+
+
+green(x) = red(x)
+
+set label 1 "500 neutral" at rg(500),yb(500) point
+set label 3 "466 blue" at rg(466),yb(466) point
+set label 4 "489 green" at rg(489),yb(489) point
+set label 5 "560 yellow" at rg(560),yb(560) point
+set label 6 "609 red" at rg(609),yb(609) point
+plot "cvrl/sp.csv" using (rg($1)):(yb($1))
+
 exit
 
 # rm = 1
