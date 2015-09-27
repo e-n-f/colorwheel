@@ -76,6 +76,16 @@ set xrange [400:700]
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
 
+sata               = 35.7368
+satb               = 25.5959
+satc               = 584.522
+satd               = 0.0404267
+sate               = -0.320295
+sat(x) = sata - satb * abs(atan((x - satc) * satd) - sate)
+fit sat(x) "uchikawa-saturation" using 1:2 via sata, satb, satc, satd, sate
+plot sat(x), "uchikawa-saturation" using 1:2
+
+
 ##########################
 #
 # 1-s2.0-004269897790013X-main.pdf
