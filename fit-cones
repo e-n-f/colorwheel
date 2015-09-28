@@ -156,6 +156,32 @@ set label 5 "560 yellow" at rg(560),yb(560) point
 set label 6 "609 red" at rg(609),yb(609) point
 plot "cvrl/sp.csv" using (rg($1)):(yb($1))
 
+
+green(x) = rod(x)
+
+rg1             = -6.13207
+rg2             = 18.9283
+rg3             = -26.2625
+k1              = 3.83591
+k2              = 1.67892
+yb1             = 5.1186
+yb2             = 0.0201581
+yb3             = 19.5873
+yb4             = 0.198561
+m               = 4.92086
+l1              = 1.4
+l2              = 1.04905
+
+fit m/del(x) "graham-hsia" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb2, yb3, yb4, m, l1, l2
+plot m/del(x), "graham-hsia" using 1:2
+
+set label 1 "500 neutral" at rg(500),yb(500) point
+set label 3 "466 blue" at rg(466),yb(466) point
+set label 4 "489 green" at rg(489),yb(489) point
+set label 5 "560 yellow" at rg(560),yb(560) point
+set label 6 "609 red" at rg(609),yb(609) point
+plot "cvrl/sp.csv" using (rg($1)):(yb($1))
+
 exit
 
 # rm = 1
