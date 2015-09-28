@@ -4,39 +4,29 @@ set terminal postscript color
 
 red(x) = red_a * exp(- (x - red_u) ** 2 / (2 * red_o ** 2)) / (red_o * sqrt(2 * pi)) + red_a1 * exp(- (x - red_u1) ** 2 / (2 * red_o1 ** 2)) / (red_o1 * sqrt(2 * pi)) + red_a2 * exp(- (x - red_u2) ** 2 / (2 * red_o2 ** 2)) / (red_o2 * sqrt(2 * pi))
 
-red_a               = 134.537
-red_u               = 579.602
-red_o               = 56.0143
-red_a1              = 20.5603
-red_u1              = 448.421
-red_o1              = 34.2699
-red_a2              = 18.5586
-red_u2              = 520.914
-red_o2              = 27.3367
-
-red_a           = 133.421  
-red_u           = 577.919  
-red_o           = 56.3307  
-red_a1          = 16.8785  
-red_u1          = 440.553  
-red_o1          = 28.4663  
-red_a2          = 28.3008  
-red_u2          = 507.765  
-red_o2          = 34.3415  
+red_a           = 133.421
+red_u           = 577.919
+red_o           = 56.331
+red_a1          = 16.8786
+red_u1          = 440.554
+red_o1          = 28.4674
+red_a2          = 28.301
+red_u2          = 507.766
+red_o2          = 34.3427
 
 fit red(x) "cvrl/ss10q_fine.csv" using 1:(exp($2)) via red_a, red_u, red_o, red_a1, red_u1, red_o1, red_a2, red_u2, red_o2
 
 green(x) = green_a * exp(- (x - green_u) ** 2 / (2 * green_o ** 2)) / (green_o * sqrt(2 * pi)) + green_a1 * exp(- (x - green_u1) ** 2 / (2 * green_o1 ** 2)) / (green_o1 * sqrt(2 * pi)) + green_a2 * exp(- (x - green_u2) ** 2 / (2 * green_o2 ** 2)) / (green_o2 * sqrt(2 * pi))
 
-green_a         = 140.635
-green_u         = 540.11 
+green_a         = 140.636
+green_u         = 540.11
 green_o         = 55.9674
-green_a1        = 4.4454 
-green_u1        = 430.908
-green_o1        = 19.2248
-green_a2        = 9.85306
+green_a1        = 4.44452
+green_u1        = 430.901
+green_o1        = 19.2206
+green_a2        = 9.85322
 green_u2        = 459.542
-green_o2        = 28.6929
+green_o2        = 28.6885
 
 fit green(x) "cvrl/ss10q_fine.csv" using 1:(exp($3)) via green_a, green_u, green_o, green_a1, green_u1, green_o1, green_a2, green_u2, green_o2
 
@@ -44,25 +34,24 @@ blue(x) = blue_a * exp(- (x - blue_u) ** 2 / (2 * blue_o ** 2)) / (blue_o * sqrt
 
 # blue cone
 
-blue_a          = 9.66919 
-blue_u          = 422.085 
-blue_o          = 16.0911 
-blue_a1         = 28.011  
-blue_u1         = 475.884 
-blue_o1         = 38.6482 
-blue_a2         = 45.924  
-blue_u2         = 448.202 
-blue_o2         = 26.0385 
+blue_a          = 9.66881
+blue_u          = 422.086
+blue_o          = 16.091
+blue_a1         = 28.0111
+blue_u1         = 475.882
+blue_o1         = 38.6503
+blue_a2         = 45.9247
+blue_u2         = 448.202
+blue_o2         = 26.0391
 
 fit blue(x) "cvrl/ss10q_fine.csv" using 1:(exp($4)) via blue_a, blue_u, blue_o, blue_a1, blue_u1, blue_o1, blue_a2, blue_u2, blue_o2
-
 
 rod_a           = 1.52372
 rod_u           = 439.008
 rod_o           = 10.8191
 rod_a1          = 18.6703
 rod_u1          = 460.534
-rod_o1          = 28.39  
+rod_o1          = 28.39
 rod_a2          = 92.6568
 rod_u2          = 509.578
 rod_o2          = 39.6545
@@ -76,11 +65,12 @@ set xrange [400:700]
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
 
-sata               = 35.7368
-satb               = 25.5959
-satc               = 584.522
-satd               = 0.0404267
-sate               = -0.320295
+sata            = 35.7153
+satb            = -25.6021
+satc            = 584.514
+satd            = 0.040497
+sate            = -0.320094
+
 sat(x) = sata - satb * abs(atan((x - satc) * satd) - sate)
 fit sat(x) "uchikawa-saturation" using 1:2 via sata, satb, satc, satd, sate
 plot sat(x), "uchikawa-saturation" using 1:2
@@ -117,20 +107,20 @@ del(x) = dist(x, x - 0.01) / 0.01
 
 plot m/del(x), "steindler-wavelength-discrimination" using 1:2
 
-rg1             = 39.3592
-rg2             = 62.813
-rg3             = -7.9613
-k1              = 3.99496
-k2              = 1.51212
-yb1             = 5.21648
-yb2             = 0.020545
-yb3             = 17.6414
-yb4             = 0.19119
-m               = 8.89235
-
 # Stockman-Sharpe V*
 l1 = 1.5
 l2 = 1
+
+rg1             = 53.6093
+rg2             = 85.5363
+rg3             = -10.714
+k1              = 4.66022
+k2              = 1.76286
+yb1             = 6.09109
+yb2             = 0.0205218
+yb3             = 20.5667
+yb4             = 0.191655
+m               = 12.0982
 
 fit m/del(x) "steindler-wavelength-discrimination" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb2, yb3, yb4, m
 
@@ -156,18 +146,18 @@ set label 5 "560 yellow" at rg(560),yb(560) point
 set label 6 "609 red" at rg(609),yb(609) point
 plot "cvrl/sp.csv" using (rg($1)):(yb($1))
 
-rg1             = -6.13207
-rg2             = 18.9283
-rg3             = -26.2625
-k1              = 3.83591
-k2              = 1.67892
-yb1             = 5.1186
-yb2             = 0.0201581
-yb3             = 19.5873
-yb4             = 0.198561
-m               = 4.92086
-l1              = 1.4
-l2              = 1.04905
+rg1             = -6.13642
+rg2             = 18.9029
+rg3             = -26.3615
+k1              = 3.83369
+k2              = 1.67744
+yb1             = 5.11569
+yb2             = 0.0201578
+yb3             = 19.5701
+yb4             = 0.198569
+m               = 4.91686
+l1              = 1.39987
+l2              = 1.04913
 
 fit m/del(x) "graham-hsia" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb2, yb3, yb4, m, l1, l2
 plot m/del(x), "graham-hsia" using 1:2
@@ -204,43 +194,43 @@ exit
 # be = 1
 # e = 1
 # c = 0
-# 
+#
 # rm = 2
-# 
+#
 # diff(x) = (rm * red(x) ** re - bm * blue(x) ** be) ** e
-# 
+#
 # fit diff(x) "cdf-529-62" using 1:2 via rm, re, bm, be, e
 # plot "cdf-529-62" using 1:2, diff(x)
-# 
+#
 # fit diff(x) "cdf-478-475" using 1:2 via rm, re, bm, be, e
 # plot "cdf-478-475" using 1:2, diff(x)
-# 
+#
 # fit diff(x) "cdf-475-22" using 1:2 via rm, re, bm, be, e
 # plot "cdf-475-22" using 1:2, diff(x)
-# 
+#
 # # # diff(x) = blue(x) - 4 * red(x)
-# # 
+# #
 # # set logscale y
 # # plot diff(x)
-# # 
+# #
 # # delta(x) = (1 /(abs(diff(x) - diff(x - .01)) / .01)) ** e
-# # 
+# #
 # # plot delta(x)
-# # 
+# #
 # # fit log(delta(x)) "nm-log" using 1:(log(1/$4)) via rm, re, bm, be, e
-# # 
+# #
 # # plot "nm-log" using 1:(1/$4), delta(x)
-# 
+#
 # undefine a, b, c, aa, bb, cc
 # bal(x) = ((a * blue(x) ** aa + b * red(x) ** bb) - (c * rod(x)) ** cc)
-# 
-# a               = 0.883833    
-# b               = 4.33976     
-# c               = 1.02621     
-# aa              = 1.40036     
-# bb              = -0.0976907  
-# cc              = 21.1082     
-# 
+#
+# a               = 0.883833
+# b               = 4.33976
+# c               = 1.02621
+# aa              = 1.40036
+# bb              = -0.0976907
+# cc              = 21.1082
+#
 # fit (bal(x)) "nm-log" using 1:((100 / $5)) via a, b, c, aa, bb, cc
 # plot "nm-log" using 1:(100 / $5), bal(x)
 # plot a * blue(x) ** aa + b * red(x) ** bb, c * rod(x) ** cc, a * blue(x) ** aa, b * red(x) ** bb
@@ -250,15 +240,15 @@ exit
 
 lum(x) = lum_a * exp(- (x - lum_u) ** 2 / (2 * lum_o ** 2)) / (lum_o * sqrt(2 * pi)) + lum_a1 * exp(- (x - lum_u1) ** 2 / (2 * lum_o1 ** 2)) / (lum_o1 * sqrt(2 * pi)) + lum_a2 * exp(- (x - lum_u2) ** 2 / (2 * lum_o2 ** 2)) / (lum_o2 * sqrt(2 * pi))
 
-lum_a           = 8.49731    
-lum_u           = 524.519    
-lum_o           = 21.9876    
-lum_a1          = 144.265    
-lum_u1          = 567.224    
-lum_o1          = 60.184     
-lum_a2          = 18.4809    
-lum_u2          = 448.06     
-lum_o2          = 36.9217    
+lum_a           = 8.49731
+lum_u           = 524.519
+lum_o           = 21.9876
+lum_a1          = 144.265
+lum_u1          = 567.224
+lum_o1          = 60.184
+lum_a2          = 18.4809
+lum_u2          = 448.06
+lum_o2          = 36.9217
 
 
 fit lum(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via lum_a, lum_u, lum_o, lum_a1, lum_u1, lum_o1, lum_a2 ,lum_u2, lum_o2
@@ -267,14 +257,14 @@ plot "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) with lines, lum(x)
 
 lum2(x) = r * red(x) ** rr + g * green(x) ** gg + b * blue(x) ** bb + rd * rod(x) ** rdrd
 
-r               = 0.91628     
-g               = 0.0880332   
-b               = 0.0457003   
-rd              = -0.0189855  
-rr              = 1.0998      
-gg              = 6.75714     
-bb              = 0.0510658   
-rdrd            = 0.214086    
+r               = 0.91628
+g               = 0.0880332
+b               = 0.0457003
+rd              = -0.0189855
+rr              = 1.0998
+gg              = 6.75714
+bb              = 0.0510658
+rdrd            = 0.214086
 
 fit lum2(x) "cvrl/logCIE2008v2q_1.csv" using 1:(exp($2)) via r, g, b, rd, rr, gg, bb, rdrd
 
