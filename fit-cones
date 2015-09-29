@@ -146,24 +146,26 @@ set label 5 "560 yellow" at rg(560),yb(560) point
 set label 6 "609 red" at rg(609),yb(609) point
 plot "cvrl/sp.csv" using (rg($1)):(yb($1))
 
-rg1             = -6.13642
-rg2             = 18.9029
-rg3             = -26.3615
-k1              = 3.83369
-k2              = 1.67744
-yb1             = 5.11569
-yb2             = 0.0201578
-yb3             = 19.5701
-yb4             = 0.198569
-m               = 4.91686
-l1              = 1.39987
-l2              = 1.04913
+rg1             = -10.1337
+rg2             = 9.97623
+rg3             = 3.07697
+k1              = 2.16463
+k2              = 1.85026
+yb1             = 2.88848
+yb3             = 21.5863
+m               = 2.96573
+l1              = 1.1441
+l2              = 1.18375
 
-fit m/del(x) "graham-hsia" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb2, yb3, yb4, m, l1, l2
-plot m/del(x), "graham-hsia" using 1:2
+# force no cone influence on yb axis
+yb2 = 0
+yb4 = 0
 
-set xrange [-45:0]
-set yrange [-30:30]
+fit m/del(x) "deuteranope-wavelength" using 1:2 via rg1, rg2, rg3, k1, k2, yb1, yb3, m, l1, l2
+plot m/del(x), "deuteranope-wavelength" using 1:2
+
+# set xrange [-45:0]
+# set yrange [-30:30]
 
 set label 1 "500 neutral" at rg(500),yb(500) point
 set label 3 "466 blue" at rg(466),yb(466) point
