@@ -2,6 +2,7 @@
 
 /**
 * sRGB to XYZ conversion matrix
+* http://www.w3.org/Graphics/Color/sRGB eq 1.1
 */
 var M = [ [0.4124, 0.3576,  0.1805],
 	  [0.2126, 0.7152,  0.0722],
@@ -9,6 +10,7 @@ var M = [ [0.4124, 0.3576,  0.1805],
 
 /**
 * XYZ to sRGB conversion matrix
+* http://www.w3.org/Graphics/Color/sRGB eq 1.8
 */
 var Mi = [ [3.2406, -1.5372, -0.4986],
 	   [-0.9689,  1.8758,  0.0415],
@@ -4635,22 +4637,28 @@ var NMtoXYZ = {
 };
 
 
-var r = Math.floor(Math.random() * 256);
-var g = Math.floor(Math.random() * 256);
-var b = Math.floor(Math.random() * 256);
+
+var r = 255;
+var g = 255;
+var b = 255;
 
 console.log("srgb: " + [r, g, b]);
 var xyz = RGBtoXYZ(r, g, b);
 console.log("xyz: " + xyz);
+var xyY = XYZtoxyY(xyz[0], xyz[1], xyz[2]);
+console.log("xyY: " + xyY);
 var ciergb = XYZtoCIERGB(xyz[0], xyz[1], xyz[2]);
 console.log("rgb: " + ciergb);
 var lms = CIERGBtoLMS(ciergb[0], ciergb[1], ciergb[2]);
 console.log("lms: " + lms);
 ciergb = LMStoCIERGB(lms[0], lms[1], lms[2]);
+console.log("");
+
+/*
+
 console.log("rgb: " + ciergb);
 xyz = CIERGBtoXYZ(ciergb[0], ciergb[1], ciergb[2]);
 console.log("xyz: " + xyz);
-
 var xyY = XYZtoxyY(xyz[0], xyz[1], xyz[2]);
 console.log("xyY: " + xyY);
 xyz = xyYtoXYZ(xyY[0], xyY[1], xyY[2]);
@@ -4665,6 +4673,29 @@ xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
 console.log("xyz: " + xyz);
 var rgb = XYZtoRGB(xyz[0], xyz[1], xyz[2]);
 console.log("srgb: " + rgb);
+
+*/
+
+lches = [ [ 74, 40, -0.00565877925372682 ],
+          [ 74, 40, Math.PI / 2 ],
+          [ 74, 40, Math.PI * 3 / 2 ],
+          [ 74, 40, 2.987493959926379 ],
+        ];
+
+for (i = 0; i < lches.length; i++) {
+  lch = lches[i];
+  console.log("lch: " + lch);
+  lab = LCHtoLAB(lch[0], lch[1], lch[2]);
+  console.log("lab: " + lab);
+  xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
+  console.log("xyz: " + xyz);
+  var ciergb = XYZtoCIERGB(xyz[0], xyz[1], xyz[2]);
+  console.log("rgb: " + ciergb);
+  var lms = CIERGBtoLMS(ciergb[0], ciergb[1], ciergb[2]);
+  console.log("lms: " + lms);
+
+  console.log("");
+}
 
 
 /*
