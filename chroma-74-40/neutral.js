@@ -195,24 +195,47 @@ function XYZtoCIERGB(X, Y, Z) {
             0.000920857 * X - 0.00254975 * Y + 0.178595  * Z ];
 }
 
-// /Users/enf/Desktop/color\ vision/1999\ Cone\ chapter\ SS.pdf 
-function CIERGBtoLMS(r, g, b) {
+/*
+
+// /Users/enf/Desktop/color\ vision/1999\ Cone\ chapter\ SS.pdf
+function StockmanSharpeRGBtoLMS(r, g, b) {
+  // This is not right for CIE RGB or sRGB.
+  //
+  // CIE RGB (tc148.pdf) uses 700nm, 546.1nm, and 435.8nm primaries.
+  // Stockman and Sharpe use 645nm, 526nm, and 444nm primaries.
+  //
+  // Another form using the Stockman-Sharpe primaries is in tc136_14.pdf
+
   return [ 2.846201 * r + 11.092490 * g + b,
            0.168926 * r +  8.265895 * g + b,
            0.000000 * r +  0.010600 * g + b ];
 }
 
 // Wolfram Alpha matrix inversion of Stockman-Stiles 1999
-function LMStoCIERGB(l, m, s) {
+function LMStoStockmanSharpeRGB(l, m, s) {
   return [  0.381762     * l - 0.512476   * m + 0.130714 * s,
            -0.00781889   * l + 0.131621   * m - 0.123809 * s,
             0.0000828061 * l - 0.00139518 * m + 1.00131  * s ];
 }
 
+*/
+
+// InstituttRapportUiO2008-XYZrepresentastionsOfStockmanSharpeFachConeFundamentals-AlychnaeDaylightAdaptation-Rapport.pdf
+function LMStoXYZ(l, m, s) {
+  return [ (1.916925 * l - 1.337568 * m + 0.452183 * s) * 100,
+           (0.646565 * l + 0.397901 * m + 0        * s) * 100,
+           (0        * l + 0        * m + 2.135669 * s) * 100 ];
+}
+
+// Wolfram Alpha inversion
 function XYZtoLMS(X, Y, Z) {
   X /= 100;
   Y /= 100;
   Z /= 100;
+
+  return [  0.24475  * X + 0.821819 * Y - 0.0517625 * Z,
+           -0.397258 * X + 1.17778  * Y + 0.0841109 * Z,
+            0        * X + 0        * Y + 0.468237  * Z];
 }
 
 function hex(v) {
@@ -4649,9 +4672,10 @@ var xyY = XYZtoxyY(xyz[0], xyz[1], xyz[2]);
 console.log("xyY: " + xyY);
 var ciergb = XYZtoCIERGB(xyz[0], xyz[1], xyz[2]);
 console.log("rgb: " + ciergb);
-var lms = CIERGBtoLMS(ciergb[0], ciergb[1], ciergb[2]);
+var lms = XYZtoLMS(xyz[0], xyz[1], xyz[2]);
 console.log("lms: " + lms);
-ciergb = LMStoCIERGB(lms[0], lms[1], lms[2]);
+xyz = LMStoXYZ(lms[0], lms[1], lms[2]);
+console.log("xyz: " + xyz);
 console.log("");
 
 /*
@@ -4689,9 +4713,11 @@ for (i = 0; i < lches.length; i++) {
   console.log("lab: " + lab);
   xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
   console.log("xyz: " + xyz);
+  var xyy = XYZtoxyY(xyz[0], xyz[1], xyz[2]);
+  console.log("xyy " + xyy);
   var ciergb = XYZtoCIERGB(xyz[0], xyz[1], xyz[2]);
   console.log("rgb: " + ciergb);
-  var lms = CIERGBtoLMS(ciergb[0], ciergb[1], ciergb[2]);
+  var lms = XYZtoLMS(xyz[0], xyz[1], xyz[2]);
   console.log("lms: " + lms);
 
   console.log("");
