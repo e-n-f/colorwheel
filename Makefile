@@ -22,14 +22,23 @@ cielch: cielch.c
 onehue: onehue.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onehue onehue.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
+onechroma: onechroma.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onechroma onechroma.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
 onelightness: onelightness.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onelightness onelightness.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
 ramp: ramp.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o ramp ramp.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
+dichromat: dichromat.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o dichromat dichromat.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
 deut: deut.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o deut deut.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
+xyy: xyy.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o xyy xyy.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
 clean:
 	rm -f stitch
