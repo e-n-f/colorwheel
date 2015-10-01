@@ -205,6 +205,9 @@ function StockmanSharpeRGBtoLMS(r, g, b) {
   // Stockman and Sharpe use 645nm, 526nm, and 444nm primaries.
   //
   // Another form using the Stockman-Sharpe primaries is in tc136_14.pdf
+  //
+  // 1-s2.0-004269899090059T-main.pdf uses the 645/526/444 primaries
+  // but has different cone data so a different matrix
 
   return [ 2.846201 * r + 11.092490 * g + b,
            0.168926 * r +  8.265895 * g + b,
