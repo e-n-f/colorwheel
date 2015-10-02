@@ -4,8 +4,8 @@
 #include <png.h>
 #include <math.h>
 
-#define WIDTH 1000
-#define HEIGHT 1000
+#define WIDTH 1024
+#define HEIGHT 1024
 
 #define MID (WIDTH / 2)
 
@@ -306,6 +306,24 @@ void xyYtoXYZ(double x, double y, double Y, double *outX, double *outY, double *
   *outZ = Z * 100;
 }
 
+// InstituttRapportUiO2008-XYZrepresentastionsOfStockmanSharpeFachConeFundamentals-AlychnaeDaylightAdaptation-Rapport.pdf
+void LMStoXYZ(double l, double m, double s, double *x, double *y, double *z) {
+	*x = (1.916925 * l - 1.337568 * m + 0.452183 * s) * 100;
+	*y = (0.646565 * l + 0.397901 * m + 0        * s) * 100;
+	*z = (0        * l + 0        * m + 2.135669 * s) * 100;
+}
+
+// Wolfram Alpha inversion
+void XYZtoLMS(double X, double Y, double Z, double *l, double *m, double *s) {
+	X /= 100;
+	Y /= 100;
+	Z /= 100;
+
+	*l =  0.24475  * X + 0.821819 * Y - 0.0517625 * Z;
+	*m = -0.397258 * X + 1.17778  * Y + 0.0841109 * Z;
+	*s =  0        * X + 0        * Y + 0.468237  * Z;
+}
+
 int main(int argc, char **argv) {
 	double bright = .075;
 
@@ -344,6 +362,104 @@ int main(int argc, char **argv) {
 			buf[(Y * HEIGHT + X) * 4 + 1] = g;
 			buf[(Y * HEIGHT + X) * 4 + 2] = b;
 			buf[(Y * HEIGHT + X) * 4 + 3] = 255 * (r >= 0 && g >= 0 && b >= 0 && r <= 255 && g <= 255 && b <= 255);
+
+			if (r < 0 || g < 0 || b < 0 || r > 255 || g > 255 | b > 255) {
+				buf[(Y * HEIGHT + X) * 4 + 0] = 50;
+				buf[(Y * HEIGHT + X) * 4 + 1] = 50;
+				buf[(Y * HEIGHT + X) * 4 + 2] = 50;
+				buf[(Y * HEIGHT + X) * 4 + 3] = 255;
+			}
+		}
+	}
+
+	{
+		int x = 0.37863113935913634 * WIDTH;
+		int y = 0.2967842309084085 * HEIGHT;
+
+		y = HEIGHT - 1 - y;
+		buf[(y * HEIGHT + x) * 4 + 0] = 255;
+		buf[(y * HEIGHT + x) * 4 + 1] = 255;
+		buf[(y * HEIGHT + x) * 4 + 2] = 255;
+		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+
+		x = 0.25950077422571144 * WIDTH;
+		y = 0.37690276825054037 * HEIGHT;
+
+		y = HEIGHT - 1 - y;
+		buf[(y * HEIGHT + x) * 4 + 0] = 255;
+		buf[(y * HEIGHT + x) * 4 + 1] = 255;
+		buf[(y * HEIGHT + x) * 4 + 2] = 255;
+		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+
+#if 0
+		// sRGB D65 white
+
+		x = 0.3127 * WIDTH;
+		y = 0.3290 * HEIGHT;
+
+		y = HEIGHT - 1 - y;
+		buf[(y * HEIGHT + x) * 4 + 0] = 255;
+		buf[(y * HEIGHT + x) * 4 + 1] = 255;
+		buf[(y * HEIGHT + x) * 4 + 2] = 255;
+		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+#endif
+
+		// This is close to 6100K white,
+		// .31977181747811490829,.33598307040241928137
+		// and lies directly between green and pink neutral points
+
+		x =  .31977181747811490829 * WIDTH;
+		y = .33598307040241928137 * HEIGHT;
+
+#if 0
+		x = .31906595679242389000 * WIDTH;
+		y = .33684349957947443500 * HEIGHT;
+#endif
+
+		y = HEIGHT - 1 - y;
+		buf[(y * HEIGHT + x) * 4 + 0] = 255;
+		buf[(y * HEIGHT + x) * 4 + 1] = 255;
+		buf[(y * HEIGHT + x) * 4 + 2] = 255;
+		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+	}
+
+	int orat = INT_MAX;
+	for (X = 0; X < WIDTH; X++) {
+		for (Y = 0; Y < HEIGHT; Y++) {
+			double x = (double) X / WIDTH;
+			double y = 1 - ((double) Y / WIDTH);
+
+			double cX, cY, cZ;
+			xyYtoXYZ(x, y, bright, &cX, &cY, &cZ);
+
+			double l, m, s;
+			XYZtoLMS(cX, cY, cZ, &l, &m, &s);
+
+			int rat = floor(log(l / s) * 5);
+
+			if (rat != orat) {
+				buf[(Y * HEIGHT + X) * 4 + 0] = 100;
+				buf[(Y * HEIGHT + X) * 4 + 1] = 100;
+				buf[(Y * HEIGHT + X) * 4 + 2] = 100;
+				buf[(Y * HEIGHT + X) * 4 + 3] = 255;
+				orat = rat;
+			}
+		}
+	}
+
+	FILE *f = fopen("cvrl/cc2012xyz2_fine_5dp.csv", "r");
+	char s[2000];
+	while (fgets(s, 2000, f)) {
+		double nm, cx, cy, cY;
+		if (sscanf(s, "%lf,%lf,%lf,%lf", &nm, &cx, &cy, &cY) == 4) {
+			int x = cx * WIDTH;
+			int y = cy * HEIGHT;
+
+			y = HEIGHT - 1 - y;
+			buf[(y * HEIGHT + x) * 4 + 0] = 255;
+			buf[(y * HEIGHT + x) * 4 + 1] = 255;
+			buf[(y * HEIGHT + x) * 4 + 2] = 255;
+			buf[(y * HEIGHT + x) * 4 + 3] = 255;
 		}
 	}
 
