@@ -220,6 +220,22 @@ function setup() {
 
 		want = Math.random() * 2 * Math.PI - Math.PI;
 
+if (0) {
+		if (Math.random() > .75) {
+			want = Math.random() - .5;
+		} else {
+			want = Math.random() - .5 + Math.PI;
+		}
+
+		if (want > Math.PI) {
+			want -= 2 * Math.PI;
+		}
+}
+
+if (0) {
+		want = Math.random() * .5 + -2.1;
+}
+
 		lch[0] = 74;
 		lch[1] = 0;
 		lch[2] = want;
