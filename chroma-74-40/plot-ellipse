@@ -1,0 +1,9 @@
+set terminal postscript
+
+a = 23
+b = 8
+xc = -.5
+yc = -1
+p = -5 * pi / 180
+
+plot "chroma-from-gray-log" using ($4 * cos($1)):($4 * sin($1)), "chroma-from-gray-log" using (xc + a * cos($1) * cos(p) - b * sin($1) * sin(p)):(yc + a * cos($1) * sin(p) + b * sin($1) * cos(p)) with points ps .5
