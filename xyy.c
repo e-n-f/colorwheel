@@ -46,7 +46,10 @@ double Mi[3][3] = { {3.2406, -1.5372, -0.4986},
            {-0.9689,  1.8758,  0.0415},
            { 0.0557, -0.2040,  1.0570} };
 
+#if 0
 double whitePoint[3] = { 95.0429, 100.0, 108.8900 }; /* D65 */
+#endif
+double whitePoint[3] = { 95.17497923187392, 100, 102.45906488893944 }; /* 6100K */
 
 double fpow(double base, double e) {
 	return exp(log(base) * e);
@@ -373,6 +376,8 @@ int main(int argc, char **argv) {
 	}
 
 	{
+		int x, y;
+#if 0
 		int x = 0.37863113935913634 * WIDTH;
 		int y = 0.2967842309084085 * HEIGHT;
 
@@ -390,6 +395,7 @@ int main(int argc, char **argv) {
 		buf[(y * HEIGHT + x) * 4 + 1] = 255;
 		buf[(y * HEIGHT + x) * 4 + 2] = 255;
 		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+#endif
 
 #if 0
 		// sRGB D65 white
@@ -404,6 +410,7 @@ int main(int argc, char **argv) {
 		buf[(y * HEIGHT + x) * 4 + 3] = 255;
 #endif
 
+#if 0
 		// This is close to 6100K white,
 		// .31977181747811490829,.33598307040241928137
 		// and lies directly between green and pink neutral points
@@ -411,16 +418,18 @@ int main(int argc, char **argv) {
 		x =  .31977181747811490829 * WIDTH;
 		y = .33598307040241928137 * HEIGHT;
 
+#endif
+
 #if 0
 		x = .31906595679242389000 * WIDTH;
 		y = .33684349957947443500 * HEIGHT;
-#endif
 
 		y = HEIGHT - 1 - y;
 		buf[(y * HEIGHT + x) * 4 + 0] = 255;
 		buf[(y * HEIGHT + x) * 4 + 1] = 255;
 		buf[(y * HEIGHT + x) * 4 + 2] = 255;
 		buf[(y * HEIGHT + x) * 4 + 3] = 255;
+#endif
 	}
 
 	int orat = INT_MAX;
@@ -447,8 +456,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	FILE *f = fopen("cvrl/cc2012xyz2_fine_5dp.csv", "r");
 	char s[2000];
+
+	FILE *f = fopen("cvrl/cc2012xyz2_fine_5dp.csv", "r");
 	while (fgets(s, 2000, f)) {
 		double nm, cx, cy, cY;
 		if (sscanf(s, "%lf,%lf,%lf,%lf", &nm, &cx, &cy, &cY) == 4) {
@@ -462,6 +472,33 @@ int main(int argc, char **argv) {
 			buf[(y * HEIGHT + x) * 4 + 3] = 255;
 		}
 	}
+	fclose(f);
+
+	f = fopen("chroma-74-40/chroma-from-gray-log", "r");
+	while (fgets(s, 2000, f)) {
+		double h, c, l, delta;
+		if (sscanf(s, "%lf %lf %lf %lf", &h, &c, &l, &delta) == 4) {
+			int i;
+			for (i = 0; i < 1; i++) {
+				double a, b;
+				LCHtoLAB(l, (i + 1) * delta, h, &l, &a, &b);
+				double X, Y, Z;
+				LABtoXYZ(l, a, b, &X, &Y, &Z);
+				double cx, cy;
+				XYZtoxyY(X, Y, Z, &cx, &cy, &Y);
+
+				int x = cx * WIDTH;
+				int y = cy * HEIGHT;
+
+				y = HEIGHT - 1 - y;
+				buf[(y * HEIGHT + x) * 4 + 0] = 255;
+				buf[(y * HEIGHT + x) * 4 + 1] = 255;
+				buf[(y * HEIGHT + x) * 4 + 2] = 255;
+				buf[(y * HEIGHT + x) * 4 + 3] = 255;
+			}
+		}
+	}
+	fclose(f);
 
 	unsigned char *rows[HEIGHT];
 	int i;
