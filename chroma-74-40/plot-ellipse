@@ -7,3 +7,5 @@ yc = -1
 p = -5 * pi / 180
 
 plot "chroma-from-gray-log" using ($4 * cos($1)):($4 * sin($1)), "chroma-from-gray-log" using (xc + a * cos($1) * cos(p) - b * sin($1) * sin(p)):(yc + a * cos($1) * sin(p) + b * sin($1) * cos(p)) with points ps .5
+
+plot "chroma-from-gray-log" using ($4 * cos($1 + .1)):(($4 * sin($1 + .1))), 337 * exp(- x ** 2 / (2 * 15.6 ** 2)) / (15.6 * sqrt(2 * pi)), -337 * exp(- x ** 2 / (2 * 15.6 ** 2)) / (15.6 * sqrt(2 * pi))
