@@ -466,6 +466,7 @@ int main(int argc, char **argv) {
 			int y = cy * HEIGHT;
 
 			y = HEIGHT - 1 - y;
+
 			buf[(y * HEIGHT + x) * 4 + 0] = 255;
 			buf[(y * HEIGHT + x) * 4 + 1] = 255;
 			buf[(y * HEIGHT + x) * 4 + 2] = 255;
@@ -518,12 +519,12 @@ int main(int argc, char **argv) {
 		for (a = -80; a <= 80; a += .1) {
 			int dir;
 			for (dir = -1; dir <= 1; dir += 2) {
-				double b = dir * 337 * exp(- a * a / (2 * 15.6 * 15.6)) / (15.6 * sqrt(2 * M_PI));
+				double b = dir * 335.582 * exp(- a * a / (2 * 15.5723 * 15.5723)) / (15.5723 * sqrt(2 * M_PI));
 
 				double h = atan2(b, a);
 				double c = sqrt(a * a + b * b);
 
-				h -= .1;
+				h -= .075;
 
 				double cX, cY, cZ;
 				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
