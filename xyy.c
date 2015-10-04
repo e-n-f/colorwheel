@@ -480,8 +480,18 @@ int main(int argc, char **argv) {
 		if (sscanf(s, "%lf %lf %lf %lf", &h, &c, &l, &delta) == 4) {
 			int i;
 			for (i = 0; i < 1; i++) {
+				// Use the lightness of the triangle,
+				// not the lightness of the test,
+				// because the chroma step is the
+				// same in each lightness, which isn't
+				// the same in xy space.
+				double cX, cY, cZ;
+				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
+				double cL, cA, cB;
+				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB);
+
 				double a, b;
-				LCHtoLAB(l, (i + 1) * delta, h, &l, &a, &b);
+				LCHtoLAB(cL, (i + 1) * delta, h, &l, &a, &b);
 				double X, Y, Z;
 				LABtoXYZ(l, a, b, &X, &Y, &Z);
 				double cx, cy;
