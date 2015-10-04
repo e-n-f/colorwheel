@@ -478,7 +478,7 @@ int main(int argc, char **argv) {
 	while (fgets(s, 2000, f)) {
 		double h, c, l, delta;
 		if (sscanf(s, "%lf %lf %lf %lf", &h, &c, &l, &delta) == 4) {
-			int i;
+			double i;
 			for (i = 0; i < 1; i++) {
 				// Use the lightness of the triangle,
 				// not the lightness of the test,
@@ -512,6 +512,49 @@ int main(int argc, char **argv) {
 		}
 	}
 	fclose(f);
+
+	{
+		double a;
+		for (a = -80; a <= 80; a += .1) {
+			int dir;
+			for (dir = -1; dir <= 1; dir += 2) {
+				double b = dir * 337 * exp(- a * a / (2 * 15.6 * 15.6)) / (15.6 * sqrt(2 * M_PI));
+
+				double h = atan2(b, a);
+				double c = sqrt(a * a + b * b);
+
+				h -= .1;
+
+				double cX, cY, cZ;
+				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
+				double cL, cA, cB;
+				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB);
+
+				int i;
+				for (i = 1; i < 10; i++) {
+					double l, a, b;
+
+					LCHtoLAB(cL, c * i, h, &l, &a, &b);
+					double X, Y, Z;
+					LABtoXYZ(l, a, b, &X, &Y, &Z);
+					double cx, cy;
+					XYZtoxyY(X, Y, Z, &cx, &cy, &Y);
+
+					int x = cx * WIDTH;
+					int y = cy * HEIGHT;
+
+					y = HEIGHT - 1 - y;
+
+					if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT) {
+						buf[(y * HEIGHT + x) * 4 + 0] = 255;
+						buf[(y * HEIGHT + x) * 4 + 1] = 255;
+						buf[(y * HEIGHT + x) * 4 + 2] = 255;
+						buf[(y * HEIGHT + x) * 4 + 3] = 255;
+					}
+				}
+			}
+		}
+	}
 
 	unsigned char *rows[HEIGHT];
 	int i;
