@@ -501,10 +501,13 @@ int main(int argc, char **argv) {
 				int y = cy * HEIGHT;
 
 				y = HEIGHT - 1 - y;
-				buf[(y * HEIGHT + x) * 4 + 0] = 255;
-				buf[(y * HEIGHT + x) * 4 + 1] = 255;
-				buf[(y * HEIGHT + x) * 4 + 2] = 255;
-				buf[(y * HEIGHT + x) * 4 + 3] = 255;
+
+				if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT) {
+					buf[(y * HEIGHT + x) * 4 + 0] = 255;
+					buf[(y * HEIGHT + x) * 4 + 1] = 255;
+					buf[(y * HEIGHT + x) * 4 + 2] = 255;
+					buf[(y * HEIGHT + x) * 4 + 3] = 255;
+				}
 			}
 		}
 	}
