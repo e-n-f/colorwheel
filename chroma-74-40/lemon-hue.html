@@ -1,0 +1,343 @@
+<html>
+<p>
+<canvas id="xyz" width="500" height="500"></canvas>
+<p>
+
+<button onclick="more()">Make more different</button>
+<button onclick="less()">Make less different</button>
+
+<form action="/cgi-bin/lemon-hue.cgi" method="post">
+
+<input type="Submit" name="success" value="Different">
+<input type="Submit" name="success" value="Hopeless">
+
+<p>
+
+<input type="text" name="H" id="H">
+<input type="text" name="difference" id="difference">
+
+</form>
+
+<script>
+var c_canvas = document.getElementById("xyz");
+var context = c_canvas.getContext("2d");
+
+context.fillStyle = "#fff";
+context.fillRect(0, 0, 500, 500);
+
+var angle_chroma = [];
+
+{
+	for (var a = -80; a <= 80; a += .1) {
+		for (var dir = -1; dir <= 1; dir += 2) {
+			var b = dir * 335.582 * Math.exp(- a * a / (2 * 15.5723 * 15.5723)) / (15.5723 * Math.sqrt(2 * Math.PI));
+			var h = Math.atan2(b, a);
+			var c = Math.sqrt(a * a + b * b);
+
+			h -= 0.075;
+
+			if (h < 0) {
+				h += 2 * Math.PI;
+			}
+
+			h = Math.floor(h * 180 / Math.PI);
+
+			if (typeof angle_chroma[h] === 'undefined' || c < angle_chroma[h]) {
+				angle_chroma[h] = c;
+				// console.log(h + ": " + c);
+			}
+		}
+	}
+
+	var mostat = 999;
+	var most = -999;
+	for (var i = 0; i < 360; i++) {
+		if (angle_chroma[i] > most) {
+			most = angle_chroma[i];
+			mostat = i;
+		}
+		if (typeof angle_chroma[i] === 'undefined') {
+			console.log("no angle for " + i);
+		}
+	}
+	console.log(mostat + ": " + most);
+}
+
+// http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
+
+/**
+* sRGB to XYZ conversion matrix
+*/
+var M = [ [0.4124, 0.3576,  0.1805],
+	  [0.2126, 0.7152,  0.0722],
+	  [0.0193, 0.1192,  0.9505] ];
+
+/**
+* XYZ to sRGB conversion matrix
+*/
+var Mi = [ [3.2406, -1.5372, -0.4986],
+	   [-0.9689,  1.8758,  0.0415],
+	   [ 0.0557, -0.2040,  1.0570] ];
+
+// https://en.wikipedia.org/wiki/CIE_1931_color_space
+function xyYtoXYZ(x, y, Y) {
+  var X = Y / y * x;
+  var Z = Y / y * (1 - x - y);
+
+  return [ X * 100, Y * 100, Z * 100 ];
+}
+
+// 6100K
+var whitePoint = xyYtoXYZ(.31977181747811490829, .33598307040241928137, 1);
+
+// var whitePoint = [ 95.0429, 100.0, 108.8900 ]; /* D65 */
+
+function RGBtoXYZ(R, G, B) {
+	// convert 0..255 into 0..1
+	var r = R / 255.0;
+	var g = G / 255.0;
+	var b = B / 255.0;
+
+	// assume sRGB
+	if (r <= 0.04045) {
+		r = r / 12.92;
+	} else {
+		r = Math.pow(((r + 0.055) / 1.055), 2.4);
+	}
+	if (g <= 0.04045) {
+		g = g / 12.92;
+	} else {
+		g = Math.pow(((g + 0.055) / 1.055), 2.4);
+	}
+	if (b <= 0.04045) {
+		b = b / 12.92;
+	} else {
+		b = Math.pow(((b + 0.055) / 1.055), 2.4);
+	}
+
+	r *= 100.0;
+	g *= 100.0;
+	b *= 100.0;
+
+	// [X Y Z] = [r g b][M]
+	return [
+		(r * M[0][0]) + (g * M[0][1]) + (b * M[0][2]),
+		(r * M[1][0]) + (g * M[1][1]) + (b * M[1][2]),
+		(r * M[2][0]) + (g * M[2][1]) + (b * M[2][2])
+	];
+}
+
+function XYZtoLAB(X, Y, Z) {
+	var x = X / whitePoint[0];
+	var y = Y / whitePoint[1];
+	var z = Z / whitePoint[2];
+
+	if (x > 0.008856) {
+		x = Math.pow(x, 1.0 / 3.0);
+	} else {
+		x = (7.787 * x) + (16.0 / 116.0);
+	}
+	if (y > 0.008856) {
+		y = Math.pow(y, 1.0 / 3.0);
+	} else {
+		y = (7.787 * y) + (16.0 / 116.0);
+	}
+	if (z > 0.008856) {
+		z = Math.pow(z, 1.0 / 3.0);
+	} else {
+		z = (7.787 * z) + (16.0 / 116.0);
+	}
+
+	return [ (116.0 * y) - 16.0, 500.0 * (x - y), 200.0 * (y - z) ];
+}
+
+function LABtoLCH(L, A, B) {
+	var C = Math.sqrt(A * A + B * B);
+	var H = Math.atan2(B, A);
+
+	return [ L, C, H ];
+}
+
+function LCHtoLAB(L, C, H) {
+	var A = C * Math.cos(H);
+	var B = C * Math.sin(H);
+
+	return [ L, A, B ];
+}
+
+function LABtoXYZ(L, a, b) {
+	var y = (L + 16.0) / 116.0;
+	var y3 = Math.pow(y, 3.0);
+	var x = (a / 500.0) + y;
+	var x3 = Math.pow(x, 3.0);
+	var z = y - (b / 200.0);
+	var z3 = Math.pow(z, 3.0);
+
+	if (y3 > 0.008856) {
+		y = y3;
+	} else {
+		y = (y - (16.0 / 116.0)) / 7.787;
+	}
+	if (x3 > 0.008856) {
+		x = x3;
+	} else {
+		x = (x - (16.0 / 116.0)) / 7.787;
+	}
+	if (z3 > 0.008856) {
+		z = z3;
+	} else {
+		z = (z - (16.0 / 116.0)) / 7.787;
+	}
+
+	return [ x * whitePoint[0], y * whitePoint[1], z * whitePoint[2] ];
+}
+
+function XYZtoRGB(X, Y, Z) {
+	var x = X / 100.0;
+	var y = Y / 100.0;
+	var z = Z / 100.0;
+
+	// [r g b] = [X Y Z][Mi]
+	var r = (x * Mi[0][0]) + (y * Mi[0][1]) + (z * Mi[0][2]);
+	var g = (x * Mi[1][0]) + (y * Mi[1][1]) + (z * Mi[1][2]);
+	var b = (x * Mi[2][0]) + (y * Mi[2][1]) + (z * Mi[2][2]);
+
+	// assume sRGB
+	if (r > 0.0031308) {
+		r = ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055);
+	} else {
+		r = (r * 12.92);
+	}
+	if (g > 0.0031308) {
+		g = ((1.055 * Math.pow(g, 1.0 / 2.4)) - 0.055);
+	} else {
+		g = (g * 12.92);
+	}
+	if (b > 0.0031308) {
+		b = ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055);
+	} else {
+		b = (b * 12.92);
+	}
+
+	if (r < 0 || g < 0 || b < 0 || r > 1 || g > 1 || b > 1) {
+		r = g = b = 0;
+	}
+
+	r = (r < 0) ? 0 : r;
+	g = (g < 0) ? 0 : g;
+	b = (b < 0) ? 0 : b;
+
+	return [r * 255, g * 255, b * 255];
+}
+
+var h1, h2;
+
+function setup() {
+	var rgb;
+
+	h1 = Math.floor(Math.random() * 360);
+	//h1 = Math.floor(Math.random() * 100) + 226;
+	//h1 = Math.floor(Math.random() * 43) + 265;
+	h2 = h1;
+}
+
+function LCHtoRGB(L, C, H) {
+	var lab = LCHtoLAB(L, C, H);
+	var xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
+	var rgb = XYZtoRGB(xyz[0], xyz[1], xyz[2]);
+	return rgb;
+}
+
+function hex(v) {
+	var h = Math.floor(v).toString(16);
+	if (h.length < 2) {
+		h = '0' + h;
+	}
+	if (h.length > 2) {
+		return '00';
+	}
+	return h;
+}
+
+function RGBtohex(R, G, B) {
+	return '#' + hex(R) + hex(G) + hex(B);
+}
+
+function display() {
+	var l1 = 74;
+
+	var c_canvas = document.getElementById("xyz");
+	var context = c_canvas.getContext("2d");
+
+	var rgb1 = LCHtoRGB(l1, angle_chroma[(h1 + 720) % 360], h1 * Math.PI / 180);
+	console.log(rgb1);
+	var hex1 = RGBtohex(rgb1[0], rgb1[1], rgb1[2]);
+
+	console.log(hex1);
+	context.fillStyle = hex1;
+	context.fillRect(0, 0, 500, 240);
+
+	var rgb2 = LCHtoRGB(l1, angle_chroma[(h2 + 720) % 360], h2 * Math.PI / 180);
+	console.log(rgb2);
+	var hex1 = RGBtohex(rgb2[0], rgb2[1], rgb2[2]);
+
+	console.log(hex1);
+	context.fillStyle = hex1;
+	context.fillRect(0, 260, 500, 500);
+
+	document.getElementById("H").value = (h1 + h2) / 2;
+	document.getElementById("difference").value = h2 - h1;
+}
+
+function less() {
+	h1++;
+	h2--;
+
+	display();
+}
+
+function more() {
+	h1--;
+	h2++;
+
+	display();
+}
+
+setup();
+display();
+
+
+if (0) {
+	var r = Math.floor(Math.random() * 256);
+	var g = Math.floor(Math.random() * 256);
+	var b = Math.floor(Math.random() * 256);
+
+	if (r > 255) {
+		r = 255;
+	}
+	if (g > 255) {
+		g = 255;
+	}
+	if (b > 255) {
+		b = 255;
+	}
+
+	console.log([r, g, b]);
+	var xyz = RGBtoXYZ(r, g, b);
+	console.log(xyz);
+	var lab = XYZtoLAB(xyz[0], xyz[1], xyz[2]);
+	console.log(lab);
+	var lch = LABtoLCH(lab[0], lab[1], lab[2]);
+	console.log(lch);
+	lab = LCHtoLAB(lch[0], lch[1], lch[2]);
+	console.log(lab);
+	xyz = LABtoXYZ(lab[0], lab[1], lab[2]);
+	var rgb = XYZtoRGB(xyz[0], xyz[1], xyz[2]);
+	console.log(rgb);
+}
+
+
+
+
+</script>
+
