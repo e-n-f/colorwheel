@@ -26,4 +26,16 @@ o2              = 11.6023
 
 fit (f(x) + f(x + 360) + f(x - 360)) "lemon-hue-log" using 1:((1/$2)) via a, u, o, a1, u1, o1, a2, u2, o2
 
+set xrange [0:360]
 plot "lemon-hue-log" using 1:(1/$2), f(x) + f(x - 360) + f(x + 360)
+
+g(x) = a * (.5 + .5 * erf((x - u) / (sqrt(2) * o))) + \
+       a1 * (.5 + .5 * erf((x - u1) / (sqrt(2) * o1))) + \
+       a2 * (.5 + .5 * erf((x - u2) / (sqrt(2) * o2)))
+
+gg(x) = (g(x) + g(x - 360) + g(x + 360))
+
+plot gg(x) - gg(0.0)
+
+print gg(360.0) - gg(0.0)
+
