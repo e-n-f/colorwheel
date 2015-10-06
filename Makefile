@@ -25,6 +25,9 @@ onehue: onehue.c
 onechroma: onechroma.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onechroma onechroma.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 
+deutchroma: deutchroma.c
+	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o deutchroma deutchroma.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
+
 onelightness: onelightness.c
 	$(CC) -g -Wall -O3 $(CFLAGS) $(LDFLAGS) -o onelightness onelightness.c $(CURL_CFLAGS) $(PNG_CFLAGS) $(JPEG_CFLAGS) $(CURL_LIBS) $(PNG_LIBS) $(JPEG_LIBS) -ljpeg -lm
 

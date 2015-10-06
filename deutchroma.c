@@ -391,9 +391,11 @@ int main(int argc, char **argv) {
 				continue;
 			}
 
-			double L = 74;
-			double C = sqrt(xd * xd + yd * yd) / HEIGHT * 6;
+			double L = 65;
+			double C = sqrt(xd * xd + yd * yd) / HEIGHT * 19;
 			double H = atan2(1 - yd, xd);
+
+			// C = .5 * 2.4;
 
 			int hh = (int) (H * 180 / M_PI + 720) % 360;
 
@@ -409,7 +411,7 @@ int main(int argc, char **argv) {
 			buf[(Y * HEIGHT + X) * 4 + 2] = b;
 			buf[(Y * HEIGHT + X) * 4 + 3] = 255 * (r >= 0 && g >= 0 && b >= 0 && r <= 255 && g <= 255 && b <= 255);
 
-			if (r < 0 || g < 0 || b < 0 || r > 230 || g > 230 | b > 230) {
+			if (r < 0 || g < 0 || b < 0 || r > 255 || g > 255 | b > 255) {
 				buf[(Y * HEIGHT + X) * 4 + 0] = 50;
 				buf[(Y * HEIGHT + X) * 4 + 1] = 50;
 				buf[(Y * HEIGHT + X) * 4 + 2] = 50;
