@@ -383,9 +383,17 @@ int main(int argc, char **argv) {
 
 	for (X = 0; X < WIDTH; X++) {
 		for (Y = 0; Y < HEIGHT; Y++) {
+                        double xd = X - MID;
+                        double yd = Y - MID;
+                        double d = sqrt(xd * xd + yd * yd);
+
+                        if (d >= MID) {
+				continue;
+			}
+
 			double L = 74;
-			double C = (double) Y / HEIGHT * 4.0;
-			double H = (double) X / WIDTH * 2 * M_PI;
+			double C = sqrt(xd * xd + yd * yd) / HEIGHT * 6;
+			double H = atan2(1 - yd, xd);
 
 			int hh = (int) (H * 180 / M_PI + 720) % 360;
 
