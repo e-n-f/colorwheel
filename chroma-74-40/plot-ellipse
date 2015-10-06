@@ -12,22 +12,18 @@ plot "chroma-from-gray-log" using ($4 * cos($1 + 0.075)):(($4 * sin($1 + 0.075))
 
 
 
-f(x) = b + a * exp(- (x - u) ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi)) + a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi)) + a3 * exp(- (x - u3) ** 2 / (2 * o3 ** 2)) / (o3 * sqrt(2 * pi))
+f(x) = a * exp(- (x - u) ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi)) + a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + a2 * exp(- (x - u2) ** 2 / (2 * o2 ** 2)) / (o2 * sqrt(2 * pi))
 
-b               = 12.1001
-a               = 8232.49
-u               = 85.228
-o               = 30.7479
-a1              = 4758.84
-u1              = 269.396
-o1              = 20.3383
-a2              = 838.072
-u2              = 217.537
-o2              = 14.4091
-a3              = -387.095
-u3              = 171.859
-o3              = 10.6351
+a               = 2.94537
+u               = 179.124
+o               = 56.7491
+a1              = 2.85711
+u1              = 350.779
+o1              = 37.6443
+a2              = 0.598982
+u2              = 172.628
+o2              = 11.6023
 
-fit (f(x) + f(x - 360) + f(x + 360)) "lemon-hue-log" using 1:2 via b, a, u, o, a1, u1, o1, a2, u2, o2, a3, u3, o3
+fit (f(x) + f(x + 360) + f(x - 360)) "lemon-hue-log" using 1:((1/$2)) via a, u, o, a1, u1, o1, a2, u2, o2
 
-plot "lemon-hue-log" using 1:2, (f(x) + f(x - 360) + f(x + 360))
+plot "lemon-hue-log" using 1:(1/$2), f(x) + f(x - 360) + f(x + 360)
