@@ -13,6 +13,31 @@ void fail() {
 
 }
 
+double angletohue1(double x) {
+	double a               = 2.90029;
+	double u               = 180.653;
+	double o               = 54.7035;
+	double a1              = 2.82902;
+	double u1              = 349.89;
+	double o1              = 36.8333;
+	double a2              = 0.581451;
+	double u2              = 172.358;
+	double o2              = 11.4344;
+	double a3              = 0.0860988;
+	double u3              = 66.6804;
+	double o3              = 12.22;
+
+	return
+		a * (.5 + .5 * erf((x - u) / (sqrt(2) * o))) + \
+		a1 * (.5 + .5 * erf((x - u1) / (sqrt(2) * o1))) + \
+		a2 * (.5 + .5 * erf((x - u2) / (sqrt(2) * o2))) + \
+		a3 * (.5 + .5 * erf((x - u3) / (sqrt(2) * o3)));
+}
+
+double angletohue(double degrees) {
+	return angletohue1(degrees - 360) + angletohue1(degrees) + angletohue1(degrees + 360);
+}
+
 
 double g(x) {
 	double a               = 1.20847  ;
@@ -329,11 +354,17 @@ void XYZtoLMS(double X, double Y, double Z, double *l, double *m, double *s) {
 
 int main(int argc, char **argv) {
 	double angle_chroma[360];
+	double angle_hue[360];
 
 	{
 		int i;
 		for (i = 0; i < 360; i++) {
 			angle_chroma[i] = 9999;
+		}
+
+		double f;
+		for (f = 0; f < 360; f += .25) {
+			angle_hue[(int) ((angletohue(f) - angletohue(0)) / (angletohue(360) - angletohue(0)) * 360)] = f;
 		}
 
 		double a;
@@ -395,12 +426,16 @@ int main(int argc, char **argv) {
 			double C = sqrt(xd * xd + yd * yd) / HEIGHT * 19;
 			double H = atan2(1 - yd, xd);
 
+			// double C = sqrt(xd * xd + yd * yd) / HEIGHT * 19 / 8;
+
 			// C = .5 * 2.4;
 
 			int hh = (int) (H * 180 / M_PI + 720) % 360;
+			hh = angle_hue[hh];
 
 			double A, B;
-			LCHtoLAB(L, C * angle_chroma[hh], H, &L, &A, &B);
+			// LCHtoLAB(L, C * 5 /* angle_chroma[hh] */, hh * M_PI / 180, &L, &A, &B);
+			LCHtoLAB(L, C * angle_chroma[hh], hh * M_PI / 180, &L, &A, &B);
 			double cX, cY, cZ;
 			LABtoXYZ(L, A, B, &cX, &cY, &cZ);
 			int r, g, b;
