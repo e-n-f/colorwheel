@@ -159,6 +159,31 @@ struct image *read_png(char *s, int len) {
 	return i;
 }
 
+double angletohue1(double x) {
+	double a               = 2.90029;
+	double u               = 180.653;
+	double o               = 54.7035;
+	double a1              = 2.82902;
+	double u1              = 349.89;
+	double o1              = 36.8333;
+	double a2              = 0.581451;
+	double u2              = 172.358;
+	double o2              = 11.4344;
+	double a3              = 0.0860988;
+	double u3              = 66.6804;
+	double o3              = 12.22;
+
+	return
+		a * (.5 + .5 * erf((x - u) / (sqrt(2) * o))) + \
+		a1 * (.5 + .5 * erf((x - u1) / (sqrt(2) * o1))) + \
+		a2 * (.5 + .5 * erf((x - u2) / (sqrt(2) * o2))) + \
+		a3 * (.5 + .5 * erf((x - u3) / (sqrt(2) * o3)));
+}
+
+double angletohue(double degrees) {
+	return angletohue1(degrees - 360) + angletohue1(degrees) + angletohue1(degrees + 360);
+}
+
 double g(x) {
 	double a               = 1.20847  ;
 	double u               = -1.67808 ;
@@ -342,6 +367,13 @@ int XYZtoRGB(double X, double Y, double Z, int *R, int *G, int *B) {
 		b = (b * 12.92);
 	}
 
+	if (r < 0) { r = 0; }
+	if (g < 0) { g = 0; }
+	if (b < 0) { b = 0; }
+	if (r > 1) { r = 1; }
+	if (g > 1) { g = 1; }
+	if (b > 1) { b = 1; }
+
 	if (r <= 0 || g <= 0 || b <= 0) {
 		return 0;
 	}
@@ -361,6 +393,53 @@ int XYZtoRGB(double X, double Y, double Z, int *R, int *G, int *B) {
 
 
 void convert(unsigned char *buf, int width, int height) {
+	double angle_chroma[360];
+	double angle_hue[360];
+	double angle_hue2[360];
+
+	double minchroma = 999;
+
+	{
+		int i;
+		for (i = 0; i < 360; i++) {
+			angle_chroma[i] = 9999;
+		}
+
+		double f;
+		for (f = 0; f < 360; f += .25) {
+			angle_hue[(int) ((angletohue(f) - angletohue(0)) / (angletohue(360) - angletohue(0)) * 360)] = f;
+			angle_hue2[(int) f] = ((angletohue(f) - angletohue(0)) / (angletohue(360) - angletohue(0)) * 360);
+		}
+
+		double a;
+		for (a = -80; a <= 80; a += .1) {
+			int dir;
+			for (dir = -1; dir <= 1; dir += 2) {
+				double b = dir * 335.582 * exp(- a * a / (2 * 15.5723 * 15.5723)) / (15.5723 * sqrt(2 * M_PI));
+				double h = atan2(b, a);
+				double c = sqrt(a * a + b * b);
+
+				h -= 0.075;
+
+				if (h < 0) {
+					h += 2 * M_PI;
+				}
+
+				h = floor(h * 180 / M_PI);
+
+				if (c < angle_chroma[(int) h]) {
+					angle_chroma[(int) h] = c;
+				}
+			}
+		}
+
+		for (i = 0; i < 360; i++) {
+			if (angle_chroma[i] < minchroma) {
+				minchroma = angle_chroma[i];
+			}
+		}
+	}
+
 	int x, y;
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
@@ -368,32 +447,27 @@ void convert(unsigned char *buf, int width, int height) {
 			int g = buf[(y * width + x) * 4 + 1];
 			int b = buf[(y * width + x) * 4 + 2];
 
-			int fail;
-			for (fail = 0; fail < 30; fail++) {
-				double X, Y, Z;
-				double L, A, B;
-				double C, H;
+			double X, Y, Z;
+			double L, A, B;
+			double C, H;
+			RGBtoXYZ(r, g, b, &X, &Y, &Z);
+			XYZtoLAB(X, Y, Z, &L, &A, &B);
+			LABtoLCH(L, A, B, &L, &C, &H);
 
-				RGBtoXYZ(r, g, b, &X, &Y, &Z);
-				XYZtoLAB(X, Y, Z, &L, &A, &B);
-				LABtoLCH(L, A, B, &L, &C, &H);
-
-				// fprintf(stderr, "H: %f, C: %f, %f and %f\n", H, C, h(H), f(C));
-
-				double error = h(H) * (f(C) / f(30));
-
-				double rnd = ((rand() & 65535) - 32768) * error / 32768;
-
-				LCHtoLAB(L, C, H + rnd, &L, &A, &B);
-				LABtoXYZ(L, A, B, &X, &Y, &Z);
-				if (XYZtoRGB(X, Y, Z, &r, &g, &b)) {
-					break;
-				}
+			if (H < 0) {
+				H += 2 * M_PI;
 			}
 
-			if (fail == 30) {
-				// r = g = b = 255;
-			}
+			// desaturate
+			C = C * minchroma / angle_chroma[(int) (H * 180 / M_PI)];
+
+			// shift hue
+			int hh = (int) (H * 180 / M_PI + 720) % 360;
+                        H = angle_hue2[hh] * M_PI / 180;
+
+			LCHtoLAB(L, C, H, &L, &A, &B);
+			LABtoXYZ(L, A, B, &X, &Y, &Z);
+			XYZtoRGB(X, Y, Z, &r, &g, &b);
 
 			buf[(y * width + x) * 4 + 0] = r;
 			buf[(y * width + x) * 4 + 1] = g;
