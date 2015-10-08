@@ -367,6 +367,7 @@ int XYZtoRGB(double X, double Y, double Z, int *R, int *G, int *B) {
 		b = (b * 12.92);
 	}
 
+#if 0
 	if (r < 0) { r = 0; }
 	if (g < 0) { g = 0; }
 	if (b < 0) { b = 0; }
@@ -383,6 +384,7 @@ int XYZtoRGB(double X, double Y, double Z, int *R, int *G, int *B) {
 	if (isnan(r) || isnan(g) || isnan(b)) {
 		return 0;
 	}
+#endif
 
 	*R = r * 255;
 	*G = g * 255;
@@ -392,12 +394,13 @@ int XYZtoRGB(double X, double Y, double Z, int *R, int *G, int *B) {
 }
 
 
-void convert(unsigned char *buf, int width, int height) {
+void convert(unsigned char *buf, int width, int height, int de) {
 	double angle_chroma[360];
 	double angle_hue[360];
 	double angle_hue2[360];
 
 	double minchroma = 999;
+	double maxchroma = 0;
 
 	{
 		int i;
@@ -437,8 +440,13 @@ void convert(unsigned char *buf, int width, int height) {
 			if (angle_chroma[i] < minchroma) {
 				minchroma = angle_chroma[i];
 			}
+			if (angle_chroma[i] > maxchroma) {
+				maxchroma = angle_chroma[i];
+			}
 		}
 	}
+
+	int *buf2 = malloc(width * height * 4 * sizeof(int));
 
 	int x, y;
 	for (y = 0; y < height; y++) {
@@ -458,20 +466,51 @@ void convert(unsigned char *buf, int width, int height) {
 				H += 2 * M_PI;
 			}
 
-			// desaturate
-			C = C * minchroma / angle_chroma[(int) (H * 180 / M_PI)];
+			if (de) {
+				// desaturate
+				C = C * minchroma / angle_chroma[(int) (H * 180 / M_PI)];
 
-			// shift hue
-			int hh = (int) (H * 180 / M_PI + 720) % 360;
-                        H = angle_hue2[hh] * M_PI / 180;
+				// shift hue
+				int hh = (int) (H * 180 / M_PI + 720) % 360;
+				H = angle_hue2[hh] * M_PI / 180;
+			} else {
+				// shift hue
+				int hh = (int) (H * 180 / M_PI + 720) % 360;
+				H = angle_hue[hh] * M_PI / 180;
+
+				// resaturate
+				C = C / minchroma * angle_chroma[(int) (H * 180 / M_PI)];
+				C *= minchroma / maxchroma;
+			}
 
 			LCHtoLAB(L, C, H, &L, &A, &B);
 			LABtoXYZ(L, A, B, &X, &Y, &Z);
 			XYZtoRGB(X, Y, Z, &r, &g, &b);
 
-			buf[(y * width + x) * 4 + 0] = r;
-			buf[(y * width + x) * 4 + 1] = g;
-			buf[(y * width + x) * 4 + 2] = b;
+			buf2[(y * width + x) * 4 + 0] = r;
+			buf2[(y * width + x) * 4 + 1] = g;
+			buf2[(y * width + x) * 4 + 2] = b;
+		}
+	}
+
+	int max = 0;
+	for (x = 0; x < width * height; x++) {
+		int i;
+		for (i = 0; i < 3; i++) {
+			if (buf2[x * 4 + i] > max) {
+				max = buf2[x * 4 + i];
+			}
+		}
+	}
+
+	for (x = 0; x < width * height; x++) {
+		int i;
+		for (i = 0; i < 3; i++) {
+			buf[x * 4 + i] = buf2[x * 4 + i] * 255 / max;
+
+			if (buf2[x * 4 + i] < 0) {
+				buf[x * 4 + i] = 0;
+			}
 		}
 	}
 }
@@ -482,11 +521,16 @@ int main(int argc, char **argv) {
 	int i;
 
 	char *outfile = NULL;
+	int de = 0;
 
-	while ((i = getopt(argc, argv, "o:")) != -1) {
+	while ((i = getopt(argc, argv, "o:d")) != -1) {
 		switch (i) {
 		case 'o':
 			outfile = optarg;
+			break;
+
+		case 'd':
+			de = 1;
 			break;
 
 		default:
@@ -614,7 +658,7 @@ int main(int argc, char **argv) {
 		rows[i] = buf + i * (4 * width);
 	}
 
-	convert(buf, width, height);
+	convert(buf, width, height, de);
 
 	png_structp png_ptr;
 	png_infop info_ptr;
