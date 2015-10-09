@@ -8,7 +8,36 @@ p = -5 * pi / 180
 
 plot "chroma-from-gray-log" using ($4 * cos($1)):($4 * sin($1)), "chroma-from-gray-log" using (xc + a * cos($1) * cos(p) - b * sin($1) * sin(p)):(yc + a * cos($1) * sin(p) + b * sin($1) * cos(p)) with points ps .5
 
+
+
+
 plot "chroma-from-gray-log" using ($4 * cos($1 + 0.075)):(($4 * sin($1 + 0.075))), 335.582 * exp(- x ** 2 / (2 * 15.5723 ** 2)) / (15.5723 * sqrt(2 * pi)), -335.582 * exp(- x ** 2 / (2 * 15.5723 ** 2)) / (15.5723 * sqrt(2 * pi))
+
+
+# 0.090 gives the best correlation with the gaussian,
+# but puts the neutral point considerably north of 500nm.
+
+a = 336.527
+o = 15.598
+
+ang = 0.090
+
+# angle correlation
+# 0.100 0.8183
+# 0.095 0.8188
+# 0.090 0.8191
+# 0.085 0.8187
+# 0.080 0.8178
+# 0.075 0.8163
+# 0.070 0.8145
+# 0.065 0.8122
+# 0.060 0.8094
+
+f(x) = a * exp(- x ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi))
+fit f(x) "chroma-from-gray-log" using ($4 * cos($1 + ang)):(abs($4 * sin($1 + ang))) via a, o
+plot f(x), "chroma-from-gray-log" using ($4 * cos($1 + ang)):(abs($4 * sin($1 + ang)))
+
+stats "chroma-from-gray-log" using (f($4 * cos($1 + ang))):(abs($4 * sin($1 + ang)))
 
 
 
