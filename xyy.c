@@ -519,12 +519,23 @@ int main(int argc, char **argv) {
 		for (a = -80; a <= 80; a += .1) {
 			int dir;
 			for (dir = -1; dir <= 1; dir += 2) {
+#ifdef BESTFIT
+				double xu = a - -0.555;
+				double b = dir * 335.012 * exp(- xu * xu / (2 * 15.4883 * 15.4883)) / (15.4883 * sqrt(2 * M_PI)) - 0.32;
+
+				double h = atan2(b, a);
+				double c = sqrt(a * a + b * b);
+
+				h -= .090;
+#else
+
 				double b = dir * 335.582 * exp(- a * a / (2 * 15.5723 * 15.5723)) / (15.5723 * sqrt(2 * M_PI));
 
 				double h = atan2(b, a);
 				double c = sqrt(a * a + b * b);
 
 				h -= .075;
+#endif
 
 				double cX, cY, cZ;
 				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
