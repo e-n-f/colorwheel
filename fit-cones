@@ -65,6 +65,21 @@ set xrange [400:700]
 plot red(x), blue(x), "cvrl/ss10q_fine.csv" using 1:(exp($2)) with lines, "cvrl/ss10q_fine.csv" using 1:(exp($4)) with lines, rod(x), "rod-sensitivity" using 1:2, green(x), "cvrl/ss10q_fine.csv" using 1:(exp($3)) with lines
 
 
+
+rod2(x) = rodred * red(x) ** rodrede + rodgreen * green(x) ** rodgreene + rodblue * blue(x) ** rodbluee
+
+rodred          = -1.37209
+rodgreen        = 2.00052
+rodblue         = -0.189917
+rodrede         = 3.15633
+rodgreene       = 1.14578
+rodbluee        = 0.349281
+
+fit rod2(x) "rod-sensitivity" using 1:2 via rodred, rodgreen, rodblue, rodrede, rodgreene, rodbluee
+plot rod2(x), "rod-sensitivity" using 1:2, rod(x)
+
+
+
 sata            = 35.7153
 satb            = -25.6021
 satc            = 584.514
