@@ -46,10 +46,8 @@ double Mi[3][3] = { {3.2406, -1.5372, -0.4986},
            {-0.9689,  1.8758,  0.0415},
            { 0.0557, -0.2040,  1.0570} };
 
-#if 0
-double whitePoint[3] = { 95.0429, 100.0, 108.8900 }; /* D65 */
-#endif
-double whitePoint[3] = { 95.17497923187392, 100, 102.45906488893944 }; /* 6100K */
+double D65[3] = { 95.0429, 100.0, 108.8900 }; /* D65 */
+double K6100[3] = { 95.17497923187392, 100, 102.45906488893944 }; /* 6100K */
 
 double fpow(double base, double e) {
 	return exp(log(base) * e);
@@ -88,7 +86,7 @@ void RGBtoXYZ(int R, int G, int B, double *x, double *y, double *z) {
 	*z = (r * M[2][0]) + (g * M[2][1]) + (b * M[2][2]);
 }
 
-void XYZtoLAB(double X, double Y, double Z, double *l, double *a, double *b) {
+void XYZtoLAB(double X, double Y, double Z, double *l, double *a, double *b, double *whitePoint) {
 	double x = X / whitePoint[0];
 	double y = Y / whitePoint[1];
 	double z = Z / whitePoint[2];
@@ -132,7 +130,7 @@ void LCHtoLAB(double L, double C, double H, double *l, double *a, double *b) {
 	*b = B;
 }
 
-void LABtoXYZ(double L, double a, double b, double *xo, double *yo, double *zo) {
+void LABtoXYZ(double L, double a, double b, double *xo, double *yo, double *zo, double *whitePoint) {
 	double y = (L + 16.0) / 116.0;
 	double y3 = fpow(y, 3.0);
 	double x = (a / 500.0) + y;
@@ -332,7 +330,14 @@ int main(int argc, char **argv) {
 
 	if (argc > 1) {
 		bright = atof(argv[1]);
+
+		double X, Y, Z;
+		LABtoXYZ(bright, 0, 0, &X, &Y, &Z, K6100);
+		bright = Y / 100;
 	}
+
+	double brown[3];
+	xyYtoXYZ(.4345, .4140, 1, &brown[0], &brown[1], &brown[2]);
 
 	unsigned char buf[WIDTH * HEIGHT * 4] = { 0 };
 	int X, Y;
@@ -489,12 +494,12 @@ int main(int argc, char **argv) {
 				double cX, cY, cZ;
 				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
 				double cL, cA, cB;
-				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB);
+				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB, K6100);
 
 				double a, b;
 				LCHtoLAB(cL, (i + 1) * delta, h, &l, &a, &b);
 				double X, Y, Z;
-				LABtoXYZ(l, a, b, &X, &Y, &Z);
+				LABtoXYZ(l, a, b, &X, &Y, &Z, K6100);
 				double cx, cy;
 				XYZtoxyY(X, Y, Z, &cx, &cy, &Y);
 
@@ -514,11 +519,57 @@ int main(int argc, char **argv) {
 	}
 	fclose(f);
 
+	f = fopen("chroma-74-40/chroma-from-warm-log", "r");
+	while (fgets(s, 2000, f)) {
+		double h, c, l, delta;
+		if (sscanf(s, "%lf %lf %lf %lf", &h, &c, &l, &delta) == 4) {
+			double i;
+			for (i = 0; i < 1; i++) {
+				// Use the lightness of the triangle,
+				// not the lightness of the test,
+				// because the chroma step is the
+				// same in each lightness, which isn't
+				// the same in xy space.
+				double cX, cY, cZ;
+				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
+				double cL, cA, cB;
+				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB, brown);
+
+				double a, b;
+				LCHtoLAB(cL, (i + 1) * delta, h, &l, &a, &b);
+				double X, Y, Z;
+				LABtoXYZ(l, a, b, &X, &Y, &Z, brown);
+				double cx, cy;
+				XYZtoxyY(X, Y, Z, &cx, &cy, &Y);
+
+				int x = cx * WIDTH;
+				int y = cy * HEIGHT;
+
+				y = HEIGHT - 1 - y;
+
+				int xo, yo;
+				for (xo = 0; xo < 2; xo++) {
+					for (yo = 0; yo < 2; yo++) {
+
+						if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT) {
+							buf[((y + yo) * HEIGHT + x + xo) * 4 + 0] = 255;
+							buf[((y + yo) * HEIGHT + x + xo) * 4 + 1] = 255;
+							buf[((y + yo) * HEIGHT + x + xo) * 4 + 2] = 255;
+							buf[((y + yo) * HEIGHT + x + xo) * 4 + 3] = 255;
+						}
+					}
+				}
+			}
+		}
+	}
+	fclose(f);
+
 	{
 		double a;
-		for (a = -80; a <= 80; a += .1) {
+		for (a = -40; a <= 40; a += .1) {
 			int dir;
 			for (dir = -1; dir <= 1; dir += 2) {
+#define BESTFIT
 #ifdef BESTFIT
 				double xu = a - -0.555;
 				double b = dir * 335.012 * exp(- xu * xu / (2 * 15.4883 * 15.4883)) / (15.4883 * sqrt(2 * M_PI)) - 0.32;
@@ -540,15 +591,15 @@ int main(int argc, char **argv) {
 				double cX, cY, cZ;
 				xyYtoXYZ(.3, .3, bright, &cX, &cY, &cZ);
 				double cL, cA, cB;
-				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB);
+				XYZtoLAB(cX, cY, cZ, &cL, &cA, &cB, K6100);
 
 				int i;
-				for (i = 1; i < 10; i++) {
+				for (i = 1; i < 2; i++) {
 					double l, a, b;
 
 					LCHtoLAB(cL, c * i, h, &l, &a, &b);
 					double X, Y, Z;
-					LABtoXYZ(l, a, b, &X, &Y, &Z);
+					LABtoXYZ(l, a, b, &X, &Y, &Z, K6100);
 					double cx, cy;
 					XYZtoxyY(X, Y, Z, &cx, &cy, &Y);
 
