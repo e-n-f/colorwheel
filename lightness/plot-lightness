@@ -1,5 +1,6 @@
 set terminal postscript
-f(x) = a * exp(- (x - u) ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi)) + a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi)) + b
+
+f(x) = m * (a * exp(- (x - u) ** 2 / (2 * o ** 2)) / (o * sqrt(2 * pi)) + a1 * exp(- (x - u1) ** 2 / (2 * o1 ** 2)) / (o1 * sqrt(2 * pi))) + b
 
 a               = 0.157233
 u               = -3.09771
@@ -9,6 +10,11 @@ u1              = 0.360252
 o1              = 0.657013
 b               = 0.324736
 
+m = 1
+
 g(x) = f(x) + f(x - 2 * pi) + f(x + 2 * pi)
 fit g(x) "lightness-log" using 1:($3 / $5) via a, u, o, a1, u1, o1, b
 plot "lightness-log" using 1:($3 / $5), g(x)
+
+fit g(x) "lightness-log-0" using 1:($3 / $5) via m, b
+plot "lightness-log-0" using 1:($3 / $5), g(x)
