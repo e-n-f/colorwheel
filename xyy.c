@@ -325,6 +325,53 @@ void XYZtoLMS(double X, double Y, double Z, double *l, double *m, double *s) {
 	*s =  0        * X + 0        * Y + 0.468237  * Z;
 }
 
+double lightness_adjust(double l, double c, double h) {
+	l /= 100;
+	c /= 100;
+
+	double a               = 0.157232;
+	double u               = -3.09771;
+	double o               = 1.35964;
+	double a1              = 0.0294973;
+	double u1              = 0.360255;
+	double o1              = 0.657014;
+
+	// apparent lightness of chroma 5 compared to chroma 0
+
+	double m               = 0.175277;
+	double b               = 0.332425;
+
+	double lbase = 0;
+	int hh;
+	for (hh = -1; hh <= 1; hh++) {
+		lbase += m * (a * exp(- (hh * h - u) * (hh * h - u) / (2 * o * o)) / (o * sqrt(2 * M_PI)) + a1 * exp(- (hh * h - u1) * (hh * h - u1) / (2 * o1 * o1)) / (o1 * sqrt(2 * M_PI))) + b;
+	}
+
+	if (c < 0.05) {
+		l *= (lbase - 1) * c / 0.05 + 1;
+	} else {
+		l *= lbase;
+
+		// incremental multiplier for each doubling of chroma
+
+		b               = 0.324736;
+		m = 1;
+
+		double inc = log(c / 0.05) / log(2);
+
+		double linc = 0;
+		int hh;
+		for (hh = -1; hh <= 1; hh++) {
+			linc += m * (a * exp(- (hh * h - u) * (hh * h - u) / (2 * o * o)) / (o * sqrt(2 * M_PI)) + a1 * exp(- (hh * h - u1) * (hh * h - u1) / (2 * o1 * o1)) / (o1 * sqrt(2 * M_PI))) + b;
+		}
+
+		l *= exp(log(linc) * inc);
+	}
+
+	l *= 100;
+	return l;
+}
+
 int main(int argc, char **argv) {
 	double bright = .075;
 
@@ -354,6 +401,8 @@ int main(int argc, char **argv) {
 		here = there;
 	}
 
+	double min = INT_MAX;
+	double max = INT_MIN;
 
 	for (X = 0; X < WIDTH; X++) {
 		for (Y = 0; Y < HEIGHT; Y++) {
@@ -366,6 +415,27 @@ int main(int argc, char **argv) {
 			int r, g, b;
 			XYZtoRGB(cX, cY, cZ, &r, &g, &b);
 
+#ifdef LIGHTNESS_ADJUST
+			double L, C, H;
+			double A, B;
+			XYZtoLAB(cX, cY, cZ, &L, &A, &B, K6100);
+			LABtoLCH(L, A, B, &L, &C, &H);
+			double L1 = lightness_adjust(L, C, H);
+
+			// printf("%f %f %f\n", L1, L, L1 / L);
+
+			if (L1 / L < min) {
+				min = L1 / L;
+			}
+			if (L1 / L > max) {
+				max = L1 / L;
+			}
+
+			r = 255 - ((L1 / L - 1) / .3) * 255;
+			g = 255 - ((L1 / L - 1) / .3) * 255;
+			b = 255 - ((L1 / L - 1) / .3) * 255;
+#endif
+
 			buf[(Y * HEIGHT + X) * 4 + 0] = r;
 			buf[(Y * HEIGHT + X) * 4 + 1] = g;
 			buf[(Y * HEIGHT + X) * 4 + 2] = b;
@@ -377,8 +447,11 @@ int main(int argc, char **argv) {
 				buf[(Y * HEIGHT + X) * 4 + 2] = 50;
 				buf[(Y * HEIGHT + X) * 4 + 3] = 255;
 			}
+
 		}
 	}
+
+	fprintf(stderr, "lightness adjust %f %f\n", min, max);
 
 	{
 		int x, y;
