@@ -141,6 +141,9 @@ fit m/del(x) "steindler-wavelength-discrimination" using 1:2 via rg1, rg2, rg3, 
 
 plot m/del(x), "steindler-wavelength-discrimination" using 1:2
 
+# Saturation model of 1-s2.0-004269897790013X-main.pdf Ingling and Tsou
+plot log(sqrt((rg(x) ** 2 + yb(x) ** 2)) / lt(x))
+
 unset xrange
 unset yrange
 
