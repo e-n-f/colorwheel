@@ -338,6 +338,9 @@ double lightness_adjust(double l, double c, double h) {
 
 	// apparent lightness of chroma 5 compared to chroma 0
 
+	double lbase = 0.00309038 * sin(h + -0.856537) + 1.00238;
+
+#if 0
 	double m               = 0.175277;
 	double b               = 0.332425;
 
@@ -346,6 +349,7 @@ double lightness_adjust(double l, double c, double h) {
 	for (hh = -1; hh <= 1; hh++) {
 		lbase += m * (a * exp(- (hh * h - u) * (hh * h - u) / (2 * o * o)) / (o * sqrt(2 * M_PI)) + a1 * exp(- (hh * h - u1) * (hh * h - u1) / (2 * o1 * o1)) / (o1 * sqrt(2 * M_PI))) + b;
 	}
+#endif
 
 	if (c < 0.05) {
 		l *= (lbase - 1) * c / 0.05 + 1;
@@ -354,8 +358,8 @@ double lightness_adjust(double l, double c, double h) {
 
 		// incremental multiplier for each doubling of chroma
 
-		b               = 0.324736;
-		m = 1;
+		double b               = 0.324736;
+		double m = 1;
 
 		double inc = log(c / 0.05) / log(2);
 
@@ -415,6 +419,8 @@ int main(int argc, char **argv) {
 			int r, g, b;
 			XYZtoRGB(cX, cY, cZ, &r, &g, &b);
 
+#define LIGHTNESS_ADJUST
+
 #ifdef LIGHTNESS_ADJUST
 			double L, C, H;
 			double A, B;
@@ -431,9 +437,17 @@ int main(int argc, char **argv) {
 				max = L1 / L;
 			}
 
+#if 0
 			r = 255 - ((L1 / L - 1) / .3) * 255;
 			g = 255 - ((L1 / L - 1) / .3) * 255;
 			b = 255 - ((L1 / L - 1) / .3) * 255;
+#endif
+
+			if (r >= 0 && g >= 0 && b >= 0 && r <= 255 && g <= 255 && b <= 255) {
+				LABtoXYZ(L1, A, B, &cX, &cY, &cZ, K6100);
+				XYZtoRGB(cX, cY, cZ, &r, &g, &b);
+			}
+
 #endif
 
 			buf[(Y * HEIGHT + X) * 4 + 0] = r;
