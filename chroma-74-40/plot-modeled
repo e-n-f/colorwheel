@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use POSIX;
+
 $pi = 4 * atan2(1, 1);
 
 @ang = (0, $pi * 1/3, $pi * 2/3, $pi * 3/3, $pi * 4/3, $pi * 5/3);
@@ -7,6 +9,56 @@ $pi = 4 * atan2(1, 1);
 $sc = .5;
 
 @d = ( "x", "x", "x", "x", "x", "x" );
+
+sub scale {
+	my ($x, $y) = @_;
+
+	return sprintf("%.3f %.3f", $x * 612, $y * 612);
+}
+
+sub labtoxyz {
+	my ($L, $a, $b) = @_;
+
+	my $y = ($L + 16.0) / 116.0;
+	my $y3 = POSIX::pow($y, 3.0);
+	my $x = ($a / 500.0) + $y;
+	my $x3 = POSIX::pow($x, 3.0);
+	my $z = $y - ($b / 200.0);
+	my $z3 = POSIX::pow($z, 3.0);
+
+	if ($y3 > 0.008856) {
+		$y = $y3;
+	} else {
+		$y = ($y - (16.0 / 116.0)) / 7.787;
+	}
+	if ($x3 > 0.008856) {
+		$x = $x3;
+	} else {
+		$x = ($x - (16.0 / 116.0)) / 7.787;
+	}
+	if ($z3 > 0.008856) {
+		$z = $z3;
+	} else {
+		$z = ($z - (16.0 / 116.0)) / 7.787;
+	}
+
+	my @whitepoint = ( 95.17497923187392, 100, 102.45906488893944 );
+
+	return ( $x * $whitepoint[0], $y * $whitepoint[1], $z * $whitepoint[2] );
+}
+
+sub xyztoxyy {
+	my ($X, $Y, $Z) = @_;
+
+	$X /= 100;
+	$Y /= 100;
+	$Z /= 100;
+
+	my $x = $X / ($X + $Y + $Z);
+	my $y = $Y / ($X + $Y + $Z);
+
+	return ( $x, $y, $Y );
+}
 
 sub bezier {
 	my ($x0, $y0, $x1, $y1, $x2, $y2, $x3, $y3) = @_;
@@ -54,12 +106,9 @@ sub bezier {
 	my $ctrl2_x = $xm2 + ($xc2 - $xm2) * $smooth_value + $x2 - $xm2;
 	my $ctrl2_y = $ym2 + ($yc2 - $ym2) * $smooth_value + $y2 - $ym2;
 
-	print "$x1 $y1 moveto ";
-
-	print "$ctrl1_x $ctrl1_y ";
-	print "$ctrl2_x $ctrl2_y ";
-
-	print "$x2 $y2 curveto stroke\n";
+	print scale($x1, $y1) . " moveto ";
+	print scale ($ctrl1_x, $ctrl1_y) . " " . scale($ctrl2_x, $ctrl2_y) . " ";
+	print scale($x2, $y2) . " curveto stroke\n";
 }
 
 for ($b = -100; $b < 120; $b += ($maxv - $minv) * .75) {
@@ -110,25 +159,37 @@ for ($b = -100; $b < 120; $b += ($maxv - $minv) * .75) {
 			}
 
 			if ($d1 ne "x" && $d2 ne "x") {
-				$x0 = 306 * ($a + $d0 * cos($a0) * $sc) / 100 + 306;
-				$y0 = 306 * ($b + $d0 * sin($a0) * $sc) / 100 + 306;
+				$x0 = ($a + $d0 * cos($a0) * $sc);
+				$y0 = ($b + $d0 * sin($a0) * $sc);
 
-				$x1 = 306 * ($a + $d1 * cos($a1) * $sc) / 100 + 306;
-				$y1 = 306 * ($b + $d1 * sin($a1) * $sc) / 100 + 306;
+				$x1 = ($a + $d1 * cos($a1) * $sc);
+				$y1 = ($b + $d1 * sin($a1) * $sc);
 
-				$x2 = 306 * ($a + $d2 * cos($a2) * $sc) / 100 + 306;
-				$y2 = 306 * ($b + $d2 * sin($a2) * $sc) / 100 + 306;
+				$x2 = ($a + $d2 * cos($a2) * $sc);
+				$y2 = ($b + $d2 * sin($a2) * $sc);
 
-				$x3 = 306 * ($a + $d3 * cos($a3) * $sc) / 100 + 306;
-				$y3 = 306 * ($b + $d3 * sin($a3) * $sc) / 100 + 306;
+				$x3 = ($a + $d3 * cos($a3) * $sc);
+				$y3 = ($b + $d3 * sin($a3) * $sc);
+
+				($x0, $y0, $z0) = labtoxyz(74,  $x0, $y0);
+				($x0, $y0, $Y0) = xyztoxyy($x0, $y0, $z0);
+				($x1, $y1, $z1) = labtoxyz(74,  $x1, $y1);
+				($x1, $y1, $Y1) = xyztoxyy($x1, $y1, $z1);
+				($x2, $y2, $z2) = labtoxyz(74,  $x2, $y2);
+				($x2, $y2, $Y2) = xyztoxyy($x2, $y2, $z2);
+				($x3, $y3, $z3) = labtoxyz(74,  $x3, $y3);
+				($x3, $y3, $Y3) = xyztoxyy($x3, $y3, $z3);
 
 				bezier($x0, $y0, $x1, $y1, $x2, $y2, $x3, $y3);
 			}
 
-			$xc = 306 * ($a) / 100 + 306;
-			$yc = 306 * ($b) / 100 + 306;
+			$xc = $a;
+			$yc = $b;
 
-			print "$xc $yc 1 0 360 arc fill\n";
+			($xc, $yc, $zc) = labtoxyz(74, $xc, $yc);
+			($x, $y, $Y) = xyztoxyy($xc, $yc, $zc);
+
+			print scale($x, $y) . " 1 0 360 arc fill\n";
 		}
 	}
 }
