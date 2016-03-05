@@ -4,7 +4,7 @@ $pi = 4 * atan2(1, 1);
 
 @ang = (0, $pi * 1/3, $pi * 2/3, $pi * 3/3, $pi * 4/3, $pi * 5/3);
 
-$sc = .3;
+$sc = .5;
 
 @d = ( "x", "x", "x", "x", "x", "x" );
 
@@ -62,8 +62,15 @@ sub bezier {
 	print "$x2 $y2 curveto stroke\n";
 }
 
-for ($a = -100; $a < 100; $a += 20) {
-	for ($b = -100; $b < 100; $b += 13) {
+for ($b = -100; $b < 120; $b += ($maxv - $minv) * .75) {
+	$maxv = 0;
+	$minv = 0;
+
+	for ($a = -100 + 8 * ($row % 2); $a < 130; $a += ($maxp - $minp) * 1.1) {
+		$row++;
+
+		$maxp = 0;
+		$minp = 0;
 
 		$d[0] = 0.660037 * exp(log(abs($b - 1.0426)) * 0.811931) + $a * -0.0421287 + 23.3819;
 		$d[1] = 0.534755 * exp(log(abs($b - -2.82523)) * 0.73873) + $a * -0.0219674 + 8.17549;
@@ -83,6 +90,20 @@ for ($a = -100; $a < 100; $a += 20) {
 			$a2 = $ang[($i + 1) % 6];
 			$a3 = $ang[($i + 2) % 6];
 
+			if ($d1 * cos($a1) * $sc > $maxp) {
+				$maxp = $d1 * cos($a1) * $sc;
+			}
+			if ($d1 * cos($a1) * $sc < $minp) {
+				$minp = $d1 * cos($a1) * $sc;
+			}
+
+			if ($d1 * sin($a1) * $sc > $maxv) {
+				$maxv = $d1 * sin($a1) * $sc;
+			}
+			if ($d1 * sin($a1) * $sc < $minv) {
+				$minv = $d1 * sin($a1) * $sc;
+			}
+
 			if ($d1 ne "x" && $d2 ne "x") {
 				$x0 = 306 * ($a + $d0 * cos($a0) * $sc) / 100 + 306;
 				$y0 = 306 * ($b + $d0 * sin($a0) * $sc) / 100 + 306;
@@ -98,6 +119,11 @@ for ($a = -100; $a < 100; $a += 20) {
 
 				bezier($x0, $y0, $x1, $y1, $x2, $y2, $x3, $y3);
 			}
+
+			$xc = 306 * ($a) / 100 + 306;
+			$yc = 306 * ($b) / 100 + 306;
+
+			print "$xc $yc 1 0 360 arc fill\n";
 		}
 	}
 }
