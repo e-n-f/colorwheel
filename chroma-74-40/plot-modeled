@@ -65,9 +65,14 @@ sub bezier {
 for ($b = -100; $b < 120; $b += ($maxv - $minv) * .75) {
 	$maxv = 0;
 	$minv = 0;
+	$row++;
 
-	for ($a = -100 + 8 * ($row % 2); $a < 130; $a += ($maxp - $minp) * 1.1) {
-		$row++;
+	@prev = sort { $a <=> $b } @prev;
+	$inc = @prev[$#prev / 2] * .55;
+	@prev = ();
+
+	for ($a = -100 - $inc * ($row % 2); $a < 130; $a += ($maxp - $minp) * 1.1) {
+		push @prev, $maxp - $minp;
 
 		$maxp = 0;
 		$minp = 0;
