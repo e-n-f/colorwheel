@@ -8,6 +8,60 @@ $sc = .3;
 
 @d = ( "x", "x", "x", "x", "x", "x" );
 
+sub bezier {
+	my ($x0, $y0, $x1, $y1, $x2, $y2, $x3, $y3) = @_;
+
+	if ($x0 == 0) {
+		$x0 = $x1;
+		$y0 = $y1;
+	}
+	if ($x3 == 0) {
+		$x3 = $x2;
+		$y3 = $y2;
+	}
+
+	# http://www.antigrain.com/research/bezier_interpolation/
+	my $xc1 = ($x0 + $x1) / 2.0;
+	my $yc1 = ($y0 + $y1) / 2.0;
+	my $xc2 = ($x1 + $x2) / 2.0;
+	my $yc2 = ($y1 + $y2) / 2.0;
+	my $xc3 = ($x2 + $x3) / 2.0;
+	my $yc3 = ($y2 + $y3) / 2.0;
+
+	my $len1 = sqrt(($x1-$x0) * ($x1-$x0) + ($y1-$y0) * ($y1-$y0));
+	my $len2 = sqrt(($x2-$x1) * ($x2-$x1) + ($y2-$y1) * ($y2-$y1));
+	my $len3 = sqrt(($x3-$x2) * ($x3-$x2) + ($y3-$y2) * ($y3-$y2));
+
+	if ($len1 + $len2 == 0 || $len2 + $len3 == 0) {
+		print STDERR "??? $x0,$y0 $x1,$y1 $x2,$y2 $x3,$y3\n";
+		return;
+	}
+
+	my $k1 = $len1 / ($len1 + $len2);
+	my $k2 = $len2 / ($len2 + $len3);
+
+	my $xm1 = $xc1 + ($xc2 - $xc1) * $k1;
+	my $ym1 = $yc1 + ($yc2 - $yc1) * $k1;
+
+	my $xm2 = $xc2 + ($xc3 - $xc2) * $k2;
+	my $ym2 = $yc2 + ($yc3 - $yc2) * $k2;
+
+	my $smooth_value = .5;
+
+	my $ctrl1_x = $xm1 + ($xc2 - $xm1) * $smooth_value + $x1 - $xm1;
+	my $ctrl1_y = $ym1 + ($yc2 - $ym1) * $smooth_value + $y1 - $ym1;
+
+	my $ctrl2_x = $xm2 + ($xc2 - $xm2) * $smooth_value + $x2 - $xm2;
+	my $ctrl2_y = $ym2 + ($yc2 - $ym2) * $smooth_value + $y2 - $ym2;
+
+	print "$x1 $y1 moveto ";
+
+	print "$ctrl1_x $ctrl1_y ";
+	print "$ctrl2_x $ctrl2_y ";
+
+	print "$x2 $y2 curveto stroke\n";
+}
+
 for ($a = -100; $a < 100; $a += 20) {
 	for ($b = -100; $b < 100; $b += 13) {
 
@@ -19,20 +73,30 @@ for ($a = -100; $a < 100; $a += 20) {
 		$d[5] = 0.214203 * exp(log(abs($b - -3.9612)) * 1.02802) + $a * -0.0175298 + 8.84261;
 
 		for ($i = 0; $i < 6; $i++) {
+			$d0 = $d[($i - 1 + 6) % 6];
 			$d1 = $d[$i];
 			$d2 = $d[($i + 1) % 6];
+			$d3 = $d[($i + 2) % 6];
 
+			$a0 = $ang[($i - 1 + 6) % 6];
 			$a1 = $ang[$i];
 			$a2 = $ang[($i + 1) % 6];
+			$a3 = $ang[($i + 2) % 6];
 
 			if ($d1 ne "x" && $d2 ne "x") {
+				$x0 = 306 * ($a + $d0 * cos($a0) * $sc) / 100 + 306;
+				$y0 = 306 * ($b + $d0 * sin($a0) * $sc) / 100 + 306;
+
 				$x1 = 306 * ($a + $d1 * cos($a1) * $sc) / 100 + 306;
 				$y1 = 306 * ($b + $d1 * sin($a1) * $sc) / 100 + 306;
 
 				$x2 = 306 * ($a + $d2 * cos($a2) * $sc) / 100 + 306;
 				$y2 = 306 * ($b + $d2 * sin($a2) * $sc) / 100 + 306;
 
-				print "$x1 $y1 moveto $x2 $y2 lineto stroke\n";
+				$x3 = 306 * ($a + $d3 * cos($a3) * $sc) / 100 + 306;
+				$y3 = 306 * ($b + $d3 * sin($a3) * $sc) / 100 + 306;
+
+				bezier($x0, $y0, $x1, $y1, $x2, $y2, $x3, $y3);
 			}
 		}
 	}
