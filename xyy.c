@@ -419,7 +419,7 @@ int main(int argc, char **argv) {
 			int r, g, b;
 			XYZtoRGB(cX, cY, cZ, &r, &g, &b);
 
-#define LIGHTNESS_ADJUST
+#undef LIGHTNESS_ADJUST
 
 #ifdef LIGHTNESS_ADJUST
 			double L, C, H;
@@ -567,6 +567,7 @@ int main(int argc, char **argv) {
 	}
 	fclose(f);
 
+#if 0
 	f = fopen("chroma-74-40/chroma-from-gray-log", "r");
 	while (fgets(s, 2000, f)) {
 		double h, c, l, delta;
@@ -650,7 +651,9 @@ int main(int argc, char **argv) {
 		}
 	}
 	fclose(f);
+#endif
 
+#if 0
 	{
 		double a;
 		for (a = -40; a <= 40; a += .1) {
@@ -705,6 +708,7 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+#endif
 
 	unsigned char *rows[HEIGHT];
 	int i;
