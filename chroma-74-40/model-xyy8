@@ -1,0 +1,36 @@
+set terminal postscript
+
+f(x, y, z) = a * abs(x - b) ** c + d * abs(y - e) ** f + g * z ** h + i + j * (abs(x - b) ** k * abs(y - c) ** l)
+set dummy x, y, z
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:4 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):4, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:5 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):5, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:6 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):6, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:7 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):7, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:8 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):8, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:9 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):9, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:10 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):10, x
+
+a = 1; b = 1; c = 1; d = 1; e = 1; f = 1; g = 1; h = 1; i = 1; j = 1; k = 1; l = 1
+fit f(x, y, z) "xyy8.log" using 1:2:3:11 via a, b, c, d, e, f, g, h, i, j, k, l
+plot "xyy8.log" using (f($1, $2, $3)):11, x
